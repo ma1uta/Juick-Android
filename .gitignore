@@ -1,7 +1,8 @@
 out/*
-gen/*
+src/main/gen/*
 .idea/*
 build/*
 .gradle/*
 keystore.properties
 Juick.apk
+local.properties
