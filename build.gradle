@@ -60,6 +60,6 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile 'org.jetbrains.anko:anko-common:0.7.2'
     compile 'com.android.support:support-v4:23.0.1'
-    compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
+    compile 'com.android.support:appcompat-v7:23.0.1'
 }
 

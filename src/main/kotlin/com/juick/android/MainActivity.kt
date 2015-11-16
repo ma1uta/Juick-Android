@@ -17,22 +17,17 @@
  */
 package com.juick.android
 
-import com.actionbarsherlock.app.ActionBar.Tab
+import android.app.ActionBar
 import com.juick.GCMIntentService
 import android.content.Intent
-// import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentTransaction
+import android.app.Fragment
+import android.support.v4.app.FragmentActivity
 import android.util.Log
-import com.actionbarsherlock.app.ActionBar
-import com.actionbarsherlock.app.SherlockFragment
-import com.actionbarsherlock.app.SherlockFragmentActivity
-import com.actionbarsherlock.view.Menu
-// import com.actionbarsherlock.view.MenuInflater
-import com.actionbarsherlock.view.MenuItem
+import android.view.Menu
+import android.view.MenuItem
 import com.google.android.gcm.GCMRegistrar
 import com.juick.R
 
@@ -40,7 +35,8 @@ import com.juick.R
 
  * @author Ugnich Anton
  */
-class MainActivity : SherlockFragmentActivity(), ActionBar.TabListener {
+
+class MainActivity : FragmentActivity(), ActionBar.TabListener {
     private var fChats: Fragment? = null
     private var fMessages: Fragment? = null
     private var fExplore: Fragment? = null
@@ -74,65 +70,64 @@ class MainActivity : SherlockFragmentActivity(), ActionBar.TabListener {
             Log.e("Juick.GCM", e.toString())
         }
 
-        val bar = supportActionBar
-        bar.setHomeButtonEnabled(false)
-        bar.navigationMode = ActionBar.NAVIGATION_MODE_TABS
+        actionBar.setHomeButtonEnabled(false)
+        actionBar.navigationMode = ActionBar.NAVIGATION_MODE_TABS
 
-        var tab: Tab
-        tab = bar.newTab().setTag("c").setText("Chats").setTabListener(this)
-        bar.addTab(tab)
-        tab = bar.newTab().setTag("f").setText("Feed").setTabListener(this)
-        bar.addTab(tab)
-        tab = bar.newTab().setTag("s").setText("Search").setTabListener(this)
-        bar.addTab(tab)
+        var tab: ActionBar.Tab = actionBar.newTab().setTag("c").setText("Chats").setTabListener(this)
+        actionBar.addTab(tab)
+        tab = actionBar.newTab().setTag("f").setText("Feed").setTabListener(this)
+        actionBar.addTab(tab)
+        tab = actionBar.newTab().setTag("s").setText("Search").setTabListener(this)
+        actionBar.addTab(tab)
     }
 
-    override fun onTabReselected(tab: Tab, ft: FragmentTransaction) {
+    override fun onTabReselected(tab: ActionBar.Tab?, ft: android.app.FragmentTransaction?) {
     }
 
-    override fun onTabSelected(tab: Tab, ft: FragmentTransaction) {
-        val tag = tab.tag.toString()
-        if (tag == "c") {
+
+    override fun onTabSelected(tab: ActionBar.Tab?, ft: android.app.FragmentTransaction?) {
+        val tag = tab?.tag.toString()
+        if (tag != null && tag == "c") {
             if (fChats == null) {
-                fChats = SherlockFragment.instantiate(this, ChatsFragment::class.java.name)
-                ft.add(android.R.id.content, fChats, "c")
+                fChats = Fragment.instantiate(this, ChatsFragment::class.java.name)
+                ft?.add(android.R.id.content, fChats, "c")
             } else {
-                ft.attach(fChats)
+                ft?.attach(fChats)
             }
         } else if (tag == "f") {
             if (fMessages == null) {
                 val b = Bundle()
                 b.putBoolean("home", true)
                 b.putBoolean("usecache", true)
-                fMessages = SherlockFragment.instantiate(this, MessagesFragment::class.java.name, b)
-                ft.add(android.R.id.content, fMessages, "m")
+                fMessages = Fragment.instantiate(this, MessagesFragment::class.java.name, b)
+                ft?.add(android.R.id.content, fMessages, "m")
             } else {
-                ft.attach(fMessages)
+                ft?.attach(fMessages)
             }
         } else {
             if (fExplore == null) {
-                fExplore = SherlockFragment.instantiate(this, ExploreFragment::class.java.name)
-                ft.add(android.R.id.content, fExplore, "e")
+                fExplore = Fragment.instantiate(this, ExploreFragment::class.java.name)
+                ft?.add(android.R.id.content, fExplore, "e")
             } else {
-                ft.attach(fExplore)
+                ft?.attach(fExplore)
             }
         }
     }
 
-    override fun onTabUnselected(tab: Tab, ft: FragmentTransaction) {
-        val tag = tab.tag.toString()
+    override fun onTabUnselected(tab: ActionBar.Tab?, ft: android.app.FragmentTransaction?) {
+        val tag = tab?.tag.toString()
         if (tag == "c") {
             if (fChats != null) {
-                ft.detach(fChats)
+                ft?.detach(fChats)
             }
         } else if (tag == "f") {
             if (fMessages != null) {
-                ft.detach(fMessages)
+                ft?.detach(fMessages)
                 fMessages = null // ANDROID BUG
             }
         } else {
             if (fExplore != null) {
-                ft.detach(fExplore)
+                ft?.detach(fExplore)
             }
         }
     }
@@ -157,7 +152,7 @@ class MainActivity : SherlockFragmentActivity(), ActionBar.TabListener {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater = supportMenuInflater
+        val inflater = menuInflater
         inflater.inflate(R.menu.main, menu)
         return true
     }

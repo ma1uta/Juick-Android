@@ -22,30 +22,26 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-// import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Vibrator
 import android.preference.PreferenceManager
-// import android.support.v4.app.FragmentTransaction
+import android.support.v4.app.FragmentActivity
 import android.support.v4.content.LocalBroadcastManager
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-// import com.actionbarsherlock.app.ActionBar
-import com.actionbarsherlock.app.SherlockFragmentActivity
-import com.actionbarsherlock.view.MenuItem
 import com.juick.GCMIntentService
 import com.juick.R
 import java.net.URLEncoder
-// import org.json.JSONObject
+import android.view.MenuItem
 
 /**
 
  * @author ugnich
  */
-class PMActivity : SherlockFragmentActivity(), PMFragment.PMFragmentListener, View.OnClickListener {
+class PMActivity : FragmentActivity(), PMFragment.PMFragmentListener, View.OnClickListener {
     private var uname: String? = null
     private var uid: Int = 0
     private var etMessage: EditText? = null
@@ -70,7 +66,7 @@ class PMActivity : SherlockFragmentActivity(), PMFragment.PMFragmentListener, Vi
         uname = intent.getStringExtra("uname")
         uid = intent.getIntExtra("uid", 0)
 
-        val bar = supportActionBar
+        val bar = actionBar
         bar.setDisplayHomeAsUpEnabled(true)
         bar.title = uname
 

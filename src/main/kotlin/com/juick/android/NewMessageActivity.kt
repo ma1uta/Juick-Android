@@ -17,6 +17,7 @@
  */
 package com.juick.android
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Context
@@ -27,20 +28,16 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Message
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.View.OnClickListener
+import android.view.Window
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
-// import com.actionbarsherlock.app.ActionBar
-import com.actionbarsherlock.app.SherlockActivity
-import com.actionbarsherlock.view.Menu
-// import com.actionbarsherlock.view.MenuInflater
-import com.actionbarsherlock.view.MenuItem
-import com.actionbarsherlock.view.Window
 import com.juick.R
 import java.io.FileInputStream
-// import java.io.OutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -48,7 +45,7 @@ import java.net.URL
 
  * @author Ugnich Anton
  */
-class NewMessageActivity : SherlockActivity(), OnClickListener {
+class NewMessageActivity : Activity(), OnClickListener {
     private var etMessage: EditText? = null
     private var bTags: ImageButton? = null
     private var bLocation: ImageButton? = null
@@ -75,7 +72,7 @@ class NewMessageActivity : SherlockActivity(), OnClickListener {
 
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS)
 
-        val bar = supportActionBar
+        val bar = actionBar
         bar.setDisplayHomeAsUpEnabled(true)
 
         setTitle(R.string.New_message)
@@ -96,7 +93,7 @@ class NewMessageActivity : SherlockActivity(), OnClickListener {
     }
 
     private fun resetForm() {
-        etMessage!!.setText("")
+        etMessage!!.text = null
         bLocation!!.setSelected(false)
         bAttachment!!.setSelected(false)
         lat = 0.0
@@ -106,7 +103,7 @@ class NewMessageActivity : SherlockActivity(), OnClickListener {
         progressDialog = null
         progressDialogCancel.bool = false
         etMessage!!.requestFocus()
-        setSupportProgressBarIndeterminateVisibility(java.lang.Boolean.FALSE)
+        setProgressBarIndeterminateVisibility(java.lang.Boolean.FALSE)
 
         /*
         setProgressBarIndeterminateVisibility(true);
@@ -160,7 +157,7 @@ class NewMessageActivity : SherlockActivity(), OnClickListener {
         bTags!!.setEnabled(state)
         bLocation!!.setEnabled(state)
         bAttachment!!.setEnabled(state)
-        setSupportProgressBarIndeterminateVisibility(if (state) java.lang.Boolean.FALSE else java.lang.Boolean.TRUE)
+        setProgressBarIndeterminateVisibility(if (state) java.lang.Boolean.FALSE else java.lang.Boolean.TRUE)
     }
 
     override protected fun onNewIntent(intent: Intent) {
@@ -213,7 +210,7 @@ class NewMessageActivity : SherlockActivity(), OnClickListener {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater = supportMenuInflater
+        val inflater = menuInflater
         inflater.inflate(R.menu.newmessage, menu)
         return true
     }
