@@ -17,18 +17,19 @@
  */
 package com.juick.android
 
-// import android.accounts.Account
+import android.accounts.Account
 import android.accounts.AccountManager
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.ConnectivityManager
-//import android.net.ConnectivityManager
-// import android.net.NetworkInfo
+import android.net.NetworkInfo
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
 import com.juick.R
+import com.neovisionaries.ws.client.WebSocketFactory
+
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -45,16 +46,16 @@ object Utils {
     fun hasAuth(context: Context): Boolean {
         val am = AccountManager.get(context)
         val accs = am.getAccountsByType(context.getString(R.string.com_juick))
-        return accs.size > 0
+        return accs.size() > 0
     }
 
     fun getBasicAuthString(context: Context): String {
         val am = AccountManager.get(context)
         val accs = am.getAccountsByType(context.getString(R.string.com_juick))
-        if (accs.size > 0) {
+        if (accs.size() > 0) {
             var b: Bundle? = null
             try {
-                b = am.getAuthToken(accs[0], "", null, false, null, null).result
+                b = am.getAuthToken(accs[0], "", false, null, null).result
             } catch (e: Exception) {
                 Log.e("getBasicAuthString", Log.getStackTraceString(e))
             }
@@ -158,8 +159,18 @@ object Utils {
     }
 
     fun isWiFiConnected(context: Context): Boolean {
-            val connManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val curr =  connManager.activeNetworkInfo
-        return curr != null && curr.isConnected
+        val connManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val mWiFi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
+        return mWiFi.isConnected
     }
+
+    private var WSFactoryInstance: WebSocketFactory? = null
+
+    val wsFactory: WebSocketFactory?
+        get() {
+            if (WSFactoryInstance == null) {
+                WSFactoryInstance = WebSocketFactory()
+            }
+            return WSFactoryInstance
+        }
 }

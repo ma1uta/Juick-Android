@@ -38,7 +38,7 @@ class TagsFragment : ListFragment(), OnItemClickListener, OnItemLongClickListene
     private var parentActivity: TagsFragmentListener? = null
     private var uid = 0
 
-    override fun onAttach(context: Context) {
+    override fun onAttach(context: Context?) {
         super.onAttach(context)
         try {
             parentActivity = activity as TagsFragmentListener?
@@ -48,7 +48,7 @@ class TagsFragment : ListFragment(), OnItemClickListener, OnItemLongClickListene
 
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle) {
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val args = arguments
@@ -94,11 +94,11 @@ class TagsFragment : ListFragment(), OnItemClickListener, OnItemLongClickListene
         thr.start()
     }
 
-    override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+    override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         parentActivity!!.onTagClick(listAdapter.getItem(position) as String)
     }
 
-    override fun onItemLongClick(parent: AdapterView<*>, view: View, position: Int, id: Long): Boolean {
+    override fun onItemLongClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long): Boolean {
         parentActivity!!.onTagLongClick(listAdapter.getItem(position) as String)
         return true
     }

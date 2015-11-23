@@ -61,7 +61,7 @@ class ContactsSyncService : Service() {
     }
 
     override fun onBind(intent: Intent): IBinder? {
-        return syncAdapter ?.syncAdapterBinder
+        return syncAdapter?.syncAdapterBinder
     }
 
     private val syncAdapter: SyncAdapterImpl?
@@ -80,11 +80,11 @@ class ContactsSyncService : Service() {
         @Throws(OperationCanceledException::class)
         private fun performSync(context: Context, account: Account, extras: Bundle, authority: String, provider: ContentProviderClient, syncResult: SyncResult) {
             val localContacts = HashMap<String, Long>()
-            mContentResolver = context.getContentResolver()
+            mContentResolver = context.contentResolver
 
             // Load the local contacts
             val rawContactUri = RawContacts.CONTENT_URI.buildUpon().appendQueryParameter(RawContacts.ACCOUNT_NAME, account.name).appendQueryParameter(RawContacts.ACCOUNT_TYPE, account.type).build()
-            val c1 = mContentResolver!!.query(rawContactUri, arrayOf<String>(BaseColumns._ID, RawContacts.SYNC1), null, null, null)
+            val c1 = mContentResolver!!.query(rawContactUri, arrayOf(BaseColumns._ID, RawContacts.SYNC1), null, null, null)
             while (c1.moveToNext()) {
                 localContacts.put(c1.getString(1), c1.getLong(0))
             }
@@ -111,7 +111,7 @@ class ContactsSyncService : Service() {
             val operationList = ArrayList<ContentProviderOperation>()
 
             //Create our RawContact
-            var builder = ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
+            var builder: ContentProviderOperation.Builder = ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
             builder.withValue(RawContacts.ACCOUNT_NAME, account.name)
             builder.withValue(RawContacts.ACCOUNT_TYPE, account.type)
             builder.withValue(RawContacts.SYNC1, user.UName)
@@ -137,7 +137,7 @@ class ContactsSyncService : Service() {
             val photo = Utils.downloadImage("http://i.juick.com/a/" + user.UID + ".png")
             if (photo != null) {
                 val baos = ByteArrayOutputStream()
-                photo!!.compress(Bitmap.CompressFormat.PNG, 100, baos)
+                photo.compress(Bitmap.CompressFormat.PNG, 100, baos)
                 builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
                 builder.withValueBackReference(ContactsContract.CommonDataKinds.Photo.RAW_CONTACT_ID, 0)
                 builder.withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE)

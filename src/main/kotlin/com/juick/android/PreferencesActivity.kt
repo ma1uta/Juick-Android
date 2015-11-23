@@ -32,7 +32,7 @@ import com.juick.R
  */
 class PreferencesActivity : PreferenceActivity(), OnSharedPreferenceChangeListener {
 
-    override protected fun onCreate(savedInstanceState: Bundle) {
+    override protected fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // fragmentManager.beginTransaction().add(R.xml.preferences, )
         addPreferencesFromResource(R.xml.preferences)
@@ -51,7 +51,7 @@ class PreferencesActivity : PreferenceActivity(), OnSharedPreferenceChangeListen
         preferenceScreen.getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         updateSummaries(preferenceScreen)
         setResult(RESULT_OK)
     }

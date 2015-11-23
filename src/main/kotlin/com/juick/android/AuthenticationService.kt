@@ -36,9 +36,9 @@ import com.juick.R
  */
 class AuthenticationService : Service() {
 
-    override fun onBind(intent: Intent): IBinder? {
+    override fun onBind(intent: Intent?): IBinder? {
         var ret: IBinder? = null
-        if (intent.action.equals(android.accounts.AccountManager.ACTION_AUTHENTICATOR_INTENT)) {
+        if (intent != null && intent.action.equals(android.accounts.AccountManager.ACTION_AUTHENTICATOR_INTENT)) {
             ret = authenticator?.iBinder
         }
         return ret
@@ -82,7 +82,7 @@ class AuthenticationService : Service() {
             return null
         }
 
-        override fun getAuthTokenLabel(arg0: String): String? {
+        override fun getAuthTokenLabel(arg0: String?): String? {
             return null
         }
 
@@ -91,7 +91,7 @@ class AuthenticationService : Service() {
             return null
         }
 
-        override fun editProperties(arg0: AccountAuthenticatorResponse, arg1: String): Bundle? {
+        override fun editProperties(arg0: AccountAuthenticatorResponse?, arg1: String?): Bundle? {
             return null
         }
     }

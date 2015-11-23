@@ -19,11 +19,12 @@ package com.juick
 
 import android.app.Notification
 import android.app.NotificationManager
-// import android.app.PendingIntent
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-// import android.content.SharedPreferences
+import android.content.SharedPreferences
 import android.preference.PreferenceManager
+import android.support.v4.app.NotificationCompat
 import android.support.v4.content.LocalBroadcastManager
 import android.util.Log
 import com.google.android.gcm.GCMBaseIntentService
@@ -40,7 +41,7 @@ import org.json.JSONObject
  */
 class GCMIntentService : GCMBaseIntentService(GCMIntentService.SENDER_ID) {
 
-    override protected fun onRegistered(context: Context, regId: String) {
+    override fun onRegistered(context: Context, regId: String) {
         try {
             val res = Utils.getJSON(context, "https://api.juick.com/android/register?regid=" + URLEncoder.encode(regId, "UTF-8"))
             if (res != null) {
@@ -53,7 +54,7 @@ class GCMIntentService : GCMBaseIntentService(GCMIntentService.SENDER_ID) {
 
     }
 
-    override protected fun onUnregistered(context: Context, regId: String) {
+    override fun onUnregistered(context: Context, regId: String) {
         try {
             Utils.getJSON(context, "https://api.juick.com/android/unregister?regid=" + URLEncoder.encode(regId, "UTF-8"))
             val spe = PreferenceManager.getDefaultSharedPreferences(context).edit()
@@ -64,9 +65,9 @@ class GCMIntentService : GCMBaseIntentService(GCMIntentService.SENDER_ID) {
 
     }
 
-    override protected fun onMessage(context: Context, intent: Intent) {
+    override fun onMessage(context: Context, intent: Intent) {
         if (intent.hasExtra("message")) {
-            val msg = intent.getExtras().getString("message")
+            val msg = intent.extras.getString("message")
             try {
                 val sp = PreferenceManager.getDefaultSharedPreferences(context)
                 val curactivity = sp.getString("currentactivity", null)
@@ -79,15 +80,14 @@ class GCMIntentService : GCMBaseIntentService(GCMIntentService.SENDER_ID) {
                     LocalBroadcastManager.getInstance(context).sendBroadcast(i)
                 } else {
                     var title = "@" + jmsg.User!!.UName!!
-                    if (!jmsg.getTags().isEmpty()) {
+                    if (!jmsg.tags.isEmpty()) {
                         title += ": " + jmsg.getTags()
                     }
-                    val body: String
-                    val len = jmsg.Text?.length ?: 0
-                    if (len > 65) {
+                    val body: String?
+                    if (jmsg.Text!!.length > 64) {
                         body = jmsg.Text!!.substring(0, 60) + "..."
                     } else {
-                        body = jmsg.Text!!
+                        body = jmsg.Text
                     }
 
                     var notifpublic = 3
@@ -105,18 +105,11 @@ class GCMIntentService : GCMBaseIntentService(GCMIntentService.SENDER_ID) {
                         } else {
                             i = Intent(context, MainActivity::class.java)
                         }
-                        // val contentIntent = PendingIntent.getActivity(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT)
-                        val notification = Notification(R.drawable.ic_notification, title, System.currentTimeMillis())
-                        // notification.setLatestEventInfo(context.applicationContext, title, body, contentIntent)
-                        notification.flags = notification.flags or Notification.FLAG_AUTO_CANCEL
-                        notification.defaults = notification.defaults or Notification.DEFAULT_LIGHTS
-                        if (notifpublic >= 2) {
-                            notification.defaults = notification.defaults or Notification.DEFAULT_VIBRATE
-                        }
-                        if (notifpublic == 3) {
-                            notification.defaults = notification.defaults or Notification.DEFAULT_SOUND
-                        }
-                        (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).notify(1, notification)
+                        val contentIntent = PendingIntent.getActivity(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT)
+                        val notification = NotificationCompat.Builder(this)
+                        notification.setSmallIcon(R.drawable.ic_notification).setContentTitle(title).setContentText(body).setAutoCancel(true).setWhen(0).setContentIntent(contentIntent).setDefaults(Notification.DEFAULT_LIGHTS or Notification.DEFAULT_VIBRATE or Notification.DEFAULT_SOUND)
+
+                        (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).notify(1, notification.build())
                     }
                 }
             } catch (e: Exception) {
@@ -126,11 +119,11 @@ class GCMIntentService : GCMBaseIntentService(GCMIntentService.SENDER_ID) {
         }
     }
 
-    override protected fun onError(context: Context, errorId: String) {
+    override fun onError(context: Context, errorId: String) {
         Log.e("GCMIntentService.onError", errorId)
     }
 
-    override protected fun onRecoverableError(context: Context, errorId: String): Boolean {
+    override fun onRecoverableError(context: Context?, errorId: String?): Boolean {
         Log.e("GCMIntentService.onRecoverableError", errorId)
         return super.onRecoverableError(context, errorId)
     }

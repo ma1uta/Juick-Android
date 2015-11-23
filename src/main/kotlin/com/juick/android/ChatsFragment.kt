@@ -44,7 +44,7 @@ import org.json.JSONObject
  */
 class ChatsFragment : ListFragment(), OnItemClickListener {
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle) {
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         listView.onItemClickListener = this
@@ -92,7 +92,7 @@ class ChatsFragment : ListFragment(), OnItemClickListener {
         thr.start()
     }
 
-    override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+    override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         val listAdapter = listAdapter as ChatsAdapter
         val item = listAdapter.getItem(position)
 
@@ -134,7 +134,7 @@ private class ChatsAdapter(context: Context) : ArrayAdapter<ChatsAdapterItem>(co
         return 0
     }
 
-    override fun getView(position: Int, convertView: View, parent: ViewGroup): View {
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
         val i = getItem(position)
         var v: View? = convertView
 

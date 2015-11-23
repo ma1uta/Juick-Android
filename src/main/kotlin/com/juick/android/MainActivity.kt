@@ -17,17 +17,24 @@
  */
 package com.juick.android
 
-import android.app.ActionBar
+import android.app.Activity
+import android.support.design.widget.TabLayout
+import android.support.v4.view.ViewPager
+import android.support.v7.app.ActionBar
+import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.Toolbar
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import com.juick.GCMIntentService
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.app.Fragment
-import android.support.v4.app.FragmentActivity
+import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentTransaction
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import com.google.android.gcm.GCMRegistrar
 import com.juick.R
 
@@ -35,14 +42,11 @@ import com.juick.R
 
  * @author Ugnich Anton
  */
+class MainActivity : AppCompatActivity() {
 
-class MainActivity : FragmentActivity(), ActionBar.TabListener {
-    private var fChats: Fragment? = null
-    private var fMessages: Fragment? = null
-    private var fExplore: Fragment? = null
-
-    override protected fun onCreate(savedInstanceState: Bundle) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
 
         val intent = intent
         if (intent != null) {
@@ -70,72 +74,23 @@ class MainActivity : FragmentActivity(), ActionBar.TabListener {
             Log.e("Juick.GCM", e.toString())
         }
 
-        actionBar.setHomeButtonEnabled(false)
-        actionBar.navigationMode = ActionBar.NAVIGATION_MODE_TABS
+        setContentView(R.layout.main)
+        val toolbar = findViewById(R.id.my_awesome_toolbar) as Toolbar
+        toolbar.setLogo(R.drawable.ic_logo)
+        setSupportActionBar(toolbar)
+        supportActionBar!!.setDisplayShowTitleEnabled(false)
 
-        var tab: ActionBar.Tab = actionBar.newTab().setTag("c").setText("Chats").setTabListener(this)
-        actionBar.addTab(tab)
-        tab = actionBar.newTab().setTag("f").setText("Feed").setTabListener(this)
-        actionBar.addTab(tab)
-        tab = actionBar.newTab().setTag("s").setText("Search").setTabListener(this)
-        actionBar.addTab(tab)
+        val viewPager = findViewById(R.id.viewpager) as ViewPager
+        viewPager.adapter = MessagesFragmentPagerAdapter(supportFragmentManager, this@MainActivity)
+
+        val tabLayout = findViewById(R.id.sliding_tabs) as TabLayout
+        tabLayout.setupWithViewPager(viewPager)
     }
 
-    override fun onTabReselected(tab: ActionBar.Tab?, ft: android.app.FragmentTransaction?) {
-    }
-
-
-    override fun onTabSelected(tab: ActionBar.Tab?, ft: android.app.FragmentTransaction?) {
-        val tag = tab?.tag.toString()
-        if (tag != null && tag == "c") {
-            if (fChats == null) {
-                fChats = Fragment.instantiate(this, ChatsFragment::class.java.name)
-                ft?.add(android.R.id.content, fChats, "c")
-            } else {
-                ft?.attach(fChats)
-            }
-        } else if (tag == "f") {
-            if (fMessages == null) {
-                val b = Bundle()
-                b.putBoolean("home", true)
-                b.putBoolean("usecache", true)
-                fMessages = Fragment.instantiate(this, MessagesFragment::class.java.name, b)
-                ft?.add(android.R.id.content, fMessages, "m")
-            } else {
-                ft?.attach(fMessages)
-            }
-        } else {
-            if (fExplore == null) {
-                fExplore = Fragment.instantiate(this, ExploreFragment::class.java.name)
-                ft?.add(android.R.id.content, fExplore, "e")
-            } else {
-                ft?.attach(fExplore)
-            }
-        }
-    }
-
-    override fun onTabUnselected(tab: ActionBar.Tab?, ft: android.app.FragmentTransaction?) {
-        val tag = tab?.tag.toString()
-        if (tag == "c") {
-            if (fChats != null) {
-                ft?.detach(fChats)
-            }
-        } else if (tag == "f") {
-            if (fMessages != null) {
-                ft?.detach(fMessages)
-                fMessages = null // ANDROID BUG
-            }
-        } else {
-            if (fExplore != null) {
-                ft?.detach(fExplore)
-            }
-        }
-    }
-
-    override protected fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == ACTIVITY_SIGNIN) {
-            if (resultCode == RESULT_OK) {
+            if (resultCode == Activity.RESULT_OK) {
                 val intent = intent
                 finish()
                 startActivity(intent)
@@ -143,7 +98,7 @@ class MainActivity : FragmentActivity(), ActionBar.TabListener {
                 finish()
             }
         } else if (requestCode == ACTIVITY_PREFERENCES) {
-            if (resultCode == RESULT_OK) {
+            if (resultCode == Activity.RESULT_OK) {
                 val intent = intent
                 finish()
                 startActivity(intent)
@@ -195,6 +150,6 @@ class MainActivity : FragmentActivity(), ActionBar.TabListener {
 
         val ACTIVITY_SIGNIN = 2
         val ACTIVITY_PREFERENCES = 3
-        // val PENDINGINTENT_CONSTANT = 713242183
+        val PENDINGINTENT_CONSTANT = 713242183
     }
 }

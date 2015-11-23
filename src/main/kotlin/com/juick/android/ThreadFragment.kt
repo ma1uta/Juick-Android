@@ -18,42 +18,47 @@
 package com.juick.android
 
 import android.app.Activity
-import android.content.Context
+import android.os.AsyncTask
+import com.juick.android.api.JuickMessage
 import android.os.Bundle
 import android.os.Vibrator
 import android.support.v4.app.ListFragment
 import android.view.View
 import android.widget.AdapterView
 import com.juick.R
-import com.juick.android.api.JuickMessage
+import com.juick.android.api.JuickUser
+import com.neovisionaries.ws.client.*
+
+import java.io.IOException
+import java.net.URI
+import java.net.URISyntaxException
 
 /**
 
  * @author Ugnich Anton
  */
-class ThreadFragment : ListFragment(), AdapterView.OnItemClickListener, WsClientListener {
+class ThreadFragment : ListFragment(), AdapterView.OnItemClickListener {
 
     private var parentActivity: ThreadFragmentListener? = null
     private var listAdapter: JuickMessagesAdapter? = null
-    private var ws: WsClient? = null
+    private var ws: WebSocket? = null
     private var mid = 0
 
-    override fun onCreate(savedInstanceState: Bundle) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
 
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
+    override fun onAttach(activity: Activity?) {
+        super.onAttach(activity)
         try {
-            parentActivity = activity as ThreadFragmentListener
+            parentActivity = activity as ThreadFragmentListener?
         } catch (e: ClassCastException) {
-            throw ClassCastException(activity.toString() + " must implement ThreadFragmentListener")
+            throw ClassCastException(activity!!.toString() + " must implement ThreadFragmentListener")
         }
 
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle) {
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val args = arguments
@@ -70,17 +75,42 @@ class ThreadFragment : ListFragment(), AdapterView.OnItemClickListener, WsClient
 
     private fun initWebSocket() {
         if (ws == null) {
-            ws = WsClient(this)
-        }
-        val wsthr = Thread(object : Runnable {
+            AsyncTask.execute(object : Runnable {
+                override fun run() {
+                    try {
+                        ws = Utils.wsFactory!!.createSocket(URI("wss", "ws.juick.com", "/" + mid, null))
+                        ws!!.addHeader("Origin", "ws.juick.com")
+                        ws!!.addHeader("Host", "ws.juick.com") //TODO: remove from server side
+                        ws!!.addListener(object : WebSocketAdapter() {
+                            @Throws(Exception::class)
+                            override fun onTextMessage(websocket: WebSocket?, jsonStr: String?) {
+                                super.onTextMessage(websocket, jsonStr)
+                                if (!isAdded) {
+                                    return
+                                }
+                                (activity.getSystemService(Activity.VIBRATOR_SERVICE) as Vibrator).vibrate(250)
+                                activity.runOnUiThread(object : Runnable {
 
-            override fun run() {
-                if (ws!!.connect("ws.juick.com", 80, "/" + mid, null) && ws != null) {
-                    ws!!.readLoop()
+                                    override fun run() {
+                                        if (jsonStr != null) {
+                                            listAdapter!!.parseJSON("[$jsonStr]")
+                                            listAdapter!!.getItem(1).Text = resources.getString(R.string.Replies) + " (" + Integer.toString(listAdapter!!.count - 2) + ")"
+                                        }
+                                    }
+                                })
+                            }
+                        })
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                    } catch (e: URISyntaxException) {
+                        e.printStackTrace()
+                    }
+
+                    ws!!.connectAsynchronously()
                 }
-            }
-        })
-        wsthr.start()
+            })
+
+        }
     }
 
     private fun initAdapter() {
@@ -131,26 +161,9 @@ class ThreadFragment : ListFragment(), AdapterView.OnItemClickListener, WsClient
         super.onPause()
     }
 
-    override fun onWebSocketTextFrame(data: String) {
-        if (!isAdded) {
-            return
-        }
-        (activity.getSystemService(Activity.VIBRATOR_SERVICE) as Vibrator).vibrate(250)
-        activity.runOnUiThread(object : Runnable {
-
-            override fun run() {
-                // if (jsonStr != null) {
-                    listAdapter!!.parseJSON("[$data]")
-                    listAdapter!!.getItem(1).Text = resources.getString(R.string.Replies) + " (" + Integer.toString(listAdapter!!.count - 2) + ")"
-                // }
-            }
-        })
-    }
-
     override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-        val jmsg = parent.getItemAtPosition(position)
-        if (jmsg is JuickMessage)
-            parentActivity!!.onReplySelected(jmsg.RID, jmsg.Text!!)
+        val jmsg = parent.getItemAtPosition(position) as JuickMessage
+        parentActivity!!.onReplySelected(jmsg.RID, jmsg!!.Text!!)
     }
 
     interface ThreadFragmentListener {

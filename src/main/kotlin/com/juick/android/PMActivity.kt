@@ -22,12 +22,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Vibrator
 import android.preference.PreferenceManager
-import android.support.v4.app.FragmentActivity
-import android.support.v4.content.LocalBroadcastManager
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -35,13 +35,14 @@ import android.widget.Toast
 import com.juick.GCMIntentService
 import com.juick.R
 import java.net.URLEncoder
-import android.view.MenuItem
+import android.support.v7.app.AppCompatActivity
+import android.support.v4.content.LocalBroadcastManager
 
 /**
 
  * @author ugnich
  */
-class PMActivity : FragmentActivity(), PMFragment.PMFragmentListener, View.OnClickListener {
+class PMActivity : AppCompatActivity(), PMFragment.PMFragmentListener, View.OnClickListener {
     private var uname: String? = null
     private var uid: Int = 0
     private var etMessage: EditText? = null
@@ -51,24 +52,23 @@ class PMActivity : FragmentActivity(), PMFragment.PMFragmentListener, View.OnCli
         override fun onReceive(context: Context, intent: Intent) {
             (context.getSystemService(Activity.VIBRATOR_SERVICE) as Vibrator).vibrate(250)
             val message = intent.getStringExtra("message")
-            val pmf = supportFragmentManager.findFragmentByTag(PMFRAGMENTID) as PMFragment
             if (message[0] == '{') {
-                pmf.onNewMessages("[$message]")
+                (getSupportFragmentManager().findFragmentByTag(PMFRAGMENTID) as PMFragment).onNewMessages("[$message]")
             } else {
-                pmf.onNewMessages(message)
+                (getSupportFragmentManager().findFragmentByTag(PMFRAGMENTID) as PMFragment).onNewMessages(message)
             }
         }
     }
 
-    override protected fun onCreate(savedInstanceState: Bundle) {
+    override protected fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        uname = intent.getStringExtra("uname")
-        uid = intent.getIntExtra("uid", 0)
+        uname = getIntent().getStringExtra("uname")
+        uid = getIntent().getIntExtra("uid", 0)
 
-        val bar = actionBar
+        val bar = getSupportActionBar()
         bar.setDisplayHomeAsUpEnabled(true)
-        bar.title = uname
+        bar.setTitle(uname)
 
         setContentView(R.layout.pm)
 
@@ -76,12 +76,12 @@ class PMActivity : FragmentActivity(), PMFragment.PMFragmentListener, View.OnCli
         bSend = findViewById(R.id.buttonSend) as Button
         bSend!!.setOnClickListener(this)
 
-        val ft = supportFragmentManager.beginTransaction()
+        val ft = getSupportFragmentManager().beginTransaction()
         val pf = PMFragment()
         val args = Bundle()
         args.putString("uname", uname)
         args.putInt("uid", uid)
-        pf.arguments = args
+        pf.setArguments(args)
         ft.add(R.id.pmfragment, pf, PMFRAGMENTID)
         ft.commit()
     }
@@ -102,16 +102,13 @@ class PMActivity : FragmentActivity(), PMFragment.PMFragmentListener, View.OnCli
 
             override fun run() {
                 try {
-                    val ret = Utils.postJSON(this@PMActivity, "https://api.juick.com/pm", "" +
-                            "uname=" + uname + "&body=" + URLEncoder.encode(body, "utf-8"))
+                    val ret = Utils.postJSON(this@PMActivity, "https://api.juick.com/pm", "uname=" + uname + "&body=" + URLEncoder.encode(body, "utf-8"))
                     this@PMActivity.runOnUiThread(object : Runnable {
 
                         override fun run() {
                             if (ret != null) {
                                 etMessage!!.setText("")
-                                val pmf = supportFragmentManager.findFragmentByTag(PMFRAGMENTID)
-                                if (pmf is PMFragment)
-                                    pmf.onNewMessages("[$ret]")
+                                (getSupportFragmentManager().findFragmentByTag(PMFRAGMENTID) as PMFragment).onNewMessages("[$ret]")
                             } else {
                                 Toast.makeText(this@PMActivity, R.string.Error, Toast.LENGTH_SHORT).show()
                             }
@@ -139,8 +136,10 @@ class PMActivity : FragmentActivity(), PMFragment.PMFragmentListener, View.OnCli
         super.onWindowFocusChanged(hasFocus)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId === android.R.id.home) {
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        if (item == null)
+            return false
+        if (item.itemId == android.R.id.home) {
             finish()
             return true
         }
@@ -151,4 +150,8 @@ class PMActivity : FragmentActivity(), PMFragment.PMFragmentListener, View.OnCli
 
         private val PMFRAGMENTID = "PMFRAGMENT"
     }
+}
+
+open class AppCompatActivity {
+
 }

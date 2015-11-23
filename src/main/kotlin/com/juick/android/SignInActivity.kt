@@ -23,8 +23,11 @@ import android.accounts.AccountManager
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.DialogInterface
-import android.os.*
+import android.os.Bundle
+import android.os.Handler
+import android.os.Message
 import android.util.Log
+import android.util.Base64
 import android.view.View
 import android.view.View.OnClickListener
 import android.widget.Button
@@ -33,7 +36,6 @@ import android.widget.Toast
 import com.juick.R
 import java.net.HttpURLConnection
 import java.net.URL
-import android.util.Base64
 
 /**
 
@@ -44,7 +46,7 @@ class SignInActivity : Activity(), OnClickListener {
     private var etNick: EditText? = null
     private var etPassword: EditText? = null
     private var bSave: Button? = null
-    private var bCancel: Button? = null
+    private val bCancel: Button? = null
     private val handlErrToast = object : Handler() {
 
         override fun handleMessage(msg: Message) {
@@ -52,7 +54,7 @@ class SignInActivity : Activity(), OnClickListener {
         }
     }
 
-    override protected fun onCreate(savedInstanceState: Bundle) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.signin)
@@ -60,17 +62,15 @@ class SignInActivity : Activity(), OnClickListener {
         etNick = findViewById(R.id.juickNick) as EditText
         etPassword = findViewById(R.id.juickPassword) as EditText
         bSave = findViewById(R.id.buttonSave) as Button
-        bCancel = findViewById(R.id.buttonCancel) as Button
 
         bSave!!.setOnClickListener(this)
-        bCancel!!.setOnClickListener(this)
 
         if (Utils.hasAuth(this)) {
             val builder = AlertDialog.Builder(this)
             builder.setNeutralButton(R.string.OK, object : android.content.DialogInterface.OnClickListener {
 
                 override fun onClick(arg0: DialogInterface, arg1: Int) {
-                    setResult(RESULT_CANCELED)
+                    setResult(Activity.RESULT_CANCELED)
                     this@SignInActivity.finish()
                 }
             })
@@ -80,11 +80,6 @@ class SignInActivity : Activity(), OnClickListener {
     }
 
     override fun onClick(view: View) {
-        if (view === bCancel) {
-            setResult(RESULT_CANCELED)
-            finish()
-            return
-        }
 
         val nick = etNick!!.text.toString()
         val password = etPassword!!.text.toString()
@@ -106,7 +101,6 @@ class SignInActivity : Activity(), OnClickListener {
 
                     val apiUrl = URL("https://api.juick.com/post")
                     val conn = apiUrl.openConnection() as HttpURLConnection
-                    conn.connectTimeout = 10000
                     conn.useCaches = false
                     conn.requestMethod = "POST"
                     conn.setRequestProperty("Authorization", basicAuth)
@@ -121,7 +115,7 @@ class SignInActivity : Activity(), OnClickListener {
                     val account = Account(nick, getString(R.string.com_juick))
                     val am = AccountManager.get(this@SignInActivity)
                     val accountCreated = am.addAccountExplicitly(account, password, null)
-                    val extras: Bundle? = intent.extras
+                    val extras = intent.extras
                     if (extras != null && accountCreated) {
                         val response = extras.getParcelable<AccountAuthenticatorResponse>(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
                         val result = Bundle()
@@ -130,7 +124,7 @@ class SignInActivity : Activity(), OnClickListener {
                         response.onResult(result)
                     }
 
-                    this@SignInActivity.setResult(RESULT_OK)
+                    this@SignInActivity.setResult(Activity.RESULT_OK)
                     this@SignInActivity.finish()
                 } else {
                     handlErrToast.sendEmptyMessage(0)

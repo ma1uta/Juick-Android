@@ -20,7 +20,6 @@ package com.juick.android
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.FragmentActivity
-// import android.support.v4.app.FragmentTransaction
 import com.juick.R
 
 /**
@@ -31,7 +30,7 @@ class TagsActivity : FragmentActivity(), TagsFragment.TagsFragmentListener {
 
     private var uid: Int = 0
 
-    override protected fun onCreate(savedInstanceState: Bundle) {
+    override protected fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         uid = intent.getIntExtra("uid", 0)

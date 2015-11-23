@@ -27,12 +27,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.view.View.OnClickListener
-import android.view.Window
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
@@ -45,7 +43,7 @@ import java.net.URL
 
  * @author Ugnich Anton
  */
-class NewMessageActivity : Activity(), OnClickListener {
+class NewMessageActivity : AppCompatActivity(), OnClickListener {
     private var etMessage: EditText? = null
     private var bTags: ImageButton? = null
     private var bLocation: ImageButton? = null
@@ -67,12 +65,12 @@ class NewMessageActivity : Activity(), OnClickListener {
         }
     }
 
-    override protected fun onCreate(savedInstanceState: Bundle) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS)
+        //        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
-        val bar = actionBar
+        val bar = supportActionBar
         bar.setDisplayHomeAsUpEnabled(true)
 
         setTitle(R.string.New_message)
@@ -93,9 +91,9 @@ class NewMessageActivity : Activity(), OnClickListener {
     }
 
     private fun resetForm() {
-        etMessage!!.text = null
-        bLocation!!.setSelected(false)
-        bAttachment!!.setSelected(false)
+        etMessage!!.setText("")
+        bLocation!!.isSelected = false
+        bAttachment!!.isSelected = false
         lat = 0.0
         lon = 0.0
         attachmentUri = null
@@ -103,7 +101,7 @@ class NewMessageActivity : Activity(), OnClickListener {
         progressDialog = null
         progressDialogCancel.bool = false
         etMessage!!.requestFocus()
-        setProgressBarIndeterminateVisibility(java.lang.Boolean.FALSE)
+        setSupportProgressBarIndeterminateVisibility(java.lang.Boolean.FALSE!!)
 
         /*
         setProgressBarIndeterminateVisibility(true);
@@ -153,14 +151,14 @@ class NewMessageActivity : Activity(), OnClickListener {
     }
 
     private fun setFormEnabled(state: Boolean) {
-        etMessage!!.setEnabled(state)
-        bTags!!.setEnabled(state)
-        bLocation!!.setEnabled(state)
-        bAttachment!!.setEnabled(state)
-        setProgressBarIndeterminateVisibility(if (state) java.lang.Boolean.FALSE else java.lang.Boolean.TRUE)
+        etMessage!!.isEnabled = state
+        bTags!!.isEnabled = state
+        bLocation!!.isEnabled = state
+        bAttachment!!.isEnabled = state
+        setSupportProgressBarIndeterminateVisibility(if (state) java.lang.Boolean.FALSE else java.lang.Boolean.TRUE)
     }
 
-    override protected fun onNewIntent(intent: Intent) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         resetForm()
         handleIntent(intent)
@@ -174,9 +172,9 @@ class NewMessageActivity : Activity(), OnClickListener {
             if (mime == "text/plain") {
                 etMessage!!.append(extras.getString(Intent.EXTRA_TEXT))
             } else if (mime == "image/jpeg" || mime == "image/png") {
-                attachmentUri = extras.get(Intent.EXTRA_STREAM).toString()
+                attachmentUri = extras.get(Intent.EXTRA_STREAM)!!.toString()
                 attachmentMime = mime
-                bAttachment!!.setSelected(true)
+                bAttachment!!.isSelected = true
             }
         }
     }
@@ -194,7 +192,7 @@ class NewMessageActivity : Activity(), OnClickListener {
             } else {
                 lat = 0.0
                 lon = 0.0
-                bLocation!!.setSelected(false)
+                bLocation!!.isSelected = false
             }
         } else if (v === bAttachment) {
             if (attachmentUri == null) {
@@ -204,7 +202,7 @@ class NewMessageActivity : Activity(), OnClickListener {
             } else {
                 attachmentUri = null
                 attachmentMime = null
-                bAttachment!!.setSelected(false)
+                bAttachment!!.isSelected = false
             }
         }
     }
@@ -216,7 +214,7 @@ class NewMessageActivity : Activity(), OnClickListener {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId === R.id.menuitem_send) {
+        if (item.itemId == R.id.menuitem_send) {
             val msg = etMessage!!.text.toString()
             if (msg.length < 3) {
                 Toast.makeText(this, R.string.Enter_a_message, Toast.LENGTH_SHORT).show()
@@ -270,7 +268,7 @@ class NewMessageActivity : Activity(), OnClickListener {
             })
             thr.start()
             return true
-        } else if (item.itemId === android.R.id.home) {
+        } else if (item.itemId == android.R.id.home) {
             finish()
             return true
         } else {
@@ -278,21 +276,21 @@ class NewMessageActivity : Activity(), OnClickListener {
         }
     }
 
-    override protected fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == RESULT_OK) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode == Activity.RESULT_OK) {
             if (requestCode == ACTIVITY_TAGS) {
                 etMessage!!.setText("*" + data!!.getStringExtra("tag") + " " + etMessage!!.text)
             } else if (requestCode == ACTIVITY_LOCATION) {
                 lat = data!!.getDoubleExtra("lat", 0.0)
                 lon = data.getDoubleExtra("lon", 0.0)
                 if (lat != 0.0 && lon != 0.0) {
-                    bLocation!!.setSelected(true)
+                    bLocation!!.isSelected = true
                 }
             } else if (requestCode == ACTIVITY_ATTACHMENT_IMAGE && data != null) {
                 attachmentUri = data.dataString
                 // How to get correct mime type?
                 attachmentMime = "image/jpeg"
-                bAttachment!!.setSelected(true)
+                bAttachment!!.isSelected = true
             }
         }
     }
@@ -347,12 +345,12 @@ class NewMessageActivity : Activity(), OnClickListener {
                 val outStrEnd = twoHyphens + boundary + twoHyphens + end
                 val outStrEndB = outStrEnd.toByteArray()
 
-                var size = outStrB.size + outStrEndB.size
+                var size = outStrB.size() + outStrEndB.size()
 
                 var fileInput: FileInputStream? = null
                 if (attachmentUri != null && attachmentUri.length > 0) {
                     fileInput = context.contentResolver.openAssetFileDescriptor(Uri.parse(attachmentUri), "r").createInputStream()
-                    size += fileInput.available()
+                    size += fileInput!!.available()
                     size += 2 // \r\n (end)
                 }
 
@@ -368,7 +366,6 @@ class NewMessageActivity : Activity(), OnClickListener {
 
                 if (attachmentUri != null && attachmentUri.length > 0 && fileInput != null) {
                     val buffer = ByteArray(4096)
-                    // var length = -1
                     var total = 0
                     var totallast = 0
                     var len = fileInput.read(buffer, 0, 4096)
