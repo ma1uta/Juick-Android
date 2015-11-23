@@ -66,7 +66,7 @@ class TagsFragment : ListFragment(), OnItemClickListener, OnItemLongClickListene
                 if (uid != 0) {
                     url += "?user_id=" + uid
                 }
-                val jsonStr = Utils.getJSON(activity, url)
+                val jsonStr = getJSON(activity, url)
                 if (isAdded) {
                     activity.runOnUiThread(object : Runnable {
 

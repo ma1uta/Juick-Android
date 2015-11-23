@@ -65,7 +65,7 @@ class ChatsFragment : ListFragment(), OnItemClickListener {
 
             override fun run() {
                 val url = "https://api.juick.com/groups_pms?cnt=10"
-                val jsonStr = Utils.getJSON(activity, url)
+                val jsonStr = getJSON(activity, url)
                 if (isAdded() && jsonStr != null && (jcacheMain == null || jsonStr != jcacheMain)) {
                     activity.runOnUiThread(object : Runnable {
 

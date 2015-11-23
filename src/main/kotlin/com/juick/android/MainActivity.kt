@@ -20,20 +20,18 @@ package com.juick.android
 import android.app.Activity
 import android.support.design.widget.TabLayout
 import android.support.v4.view.ViewPager
-import android.support.v7.app.ActionBar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import com.juick.GCMIntentService
 import android.content.Intent
-import android.content.SharedPreferences
+// import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentTransaction
+// import android.support.v4.app.Fragment
+// import android.support.v4.app.FragmentTransaction
 import android.util.Log
 import com.google.android.gcm.GCMRegistrar
 import com.juick.R
@@ -56,7 +54,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        if (!Utils.hasAuth(this)) {
+        if (!hasAuth(this)) {
             startActivityForResult(Intent(this, SignInActivity::class.java), ACTIVITY_SIGNIN)
             return
         }

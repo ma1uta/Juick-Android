@@ -65,7 +65,7 @@ class PMFragment : ListFragment() {
 
             override fun run() {
                 val url = "https://api.juick.com/pm?uname=" + uname!!
-                val jsonStr = Utils.getJSON(activity, url)
+                val jsonStr = getJSON(activity, url)
                 if (isAdded) {
                     onNewMessages(jsonStr)
                 }

@@ -46,7 +46,7 @@ class SignInActivity : Activity(), OnClickListener {
     private var etNick: EditText? = null
     private var etPassword: EditText? = null
     private var bSave: Button? = null
-    private val bCancel: Button? = null
+    // private val bCancel: Button? = null
     private val handlErrToast = object : Handler() {
 
         override fun handleMessage(msg: Message) {
@@ -65,7 +65,7 @@ class SignInActivity : Activity(), OnClickListener {
 
         bSave!!.setOnClickListener(this)
 
-        if (Utils.hasAuth(this)) {
+        if (hasAuth(this)) {
             val builder = AlertDialog.Builder(this)
             builder.setNeutralButton(R.string.OK, object : android.content.DialogInterface.OnClickListener {
 

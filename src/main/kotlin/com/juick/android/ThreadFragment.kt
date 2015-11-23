@@ -26,7 +26,6 @@ import android.support.v4.app.ListFragment
 import android.view.View
 import android.widget.AdapterView
 import com.juick.R
-import com.juick.android.api.JuickUser
 import com.neovisionaries.ws.client.*
 
 import java.io.IOException
@@ -78,7 +77,7 @@ class ThreadFragment : ListFragment(), AdapterView.OnItemClickListener {
             AsyncTask.execute(object : Runnable {
                 override fun run() {
                     try {
-                        ws = Utils.wsFactory!!.createSocket(URI("wss", "ws.juick.com", "/" + mid, null))
+                        ws = wsFactory!!.createSocket(URI("wss", "ws.juick.com", "/" + mid, null))
                         ws!!.addHeader("Origin", "ws.juick.com")
                         ws!!.addHeader("Host", "ws.juick.com") //TODO: remove from server side
                         ws!!.addListener(object : WebSocketAdapter() {
@@ -122,7 +121,7 @@ class ThreadFragment : ListFragment(), AdapterView.OnItemClickListener {
         val thr = Thread(object : Runnable {
 
             override fun run() {
-                val jsonStr = Utils.getJSON(activity, "https://api.juick.com/thread?mid=" + mid)
+                val jsonStr = getJSON(activity, "https://api.juick.com/thread?mid=" + mid)
                 if (isAdded) {
                     activity.runOnUiThread(object : Runnable {
 
@@ -163,7 +162,7 @@ class ThreadFragment : ListFragment(), AdapterView.OnItemClickListener {
 
     override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
         val jmsg = parent.getItemAtPosition(position) as JuickMessage
-        parentActivity!!.onReplySelected(jmsg.RID, jmsg!!.Text!!)
+        parentActivity!!.onReplySelected(jmsg.RID, jmsg.Text!!)
     }
 
     interface ThreadFragmentListener {

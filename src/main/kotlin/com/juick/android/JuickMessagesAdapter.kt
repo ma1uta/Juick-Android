@@ -64,7 +64,7 @@ class JuickMessagesAdapter(context: Context, private val type: Int) : ArrayAdapt
         }
 
         val loadphotos = sp.getString("loadphotos", "Always")
-        if (loadphotos[0] == 'A' || (loadphotos[0] == 'W' && Utils.isWiFiConnected(context))) {
+        if (loadphotos[0] == 'A' || (loadphotos[0] == 'W' && isWiFiConnected(context))) {
             usenetwork = true
         }
 

@@ -22,7 +22,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Vibrator
 import android.preference.PreferenceManager
@@ -102,7 +101,7 @@ class PMActivity : AppCompatActivity(), PMFragment.PMFragmentListener, View.OnCl
 
             override fun run() {
                 try {
-                    val ret = Utils.postJSON(this@PMActivity, "https://api.juick.com/pm", "uname=" + uname + "&body=" + URLEncoder.encode(body, "utf-8"))
+                    val ret = postJSON(this@PMActivity, "https://api.juick.com/pm", "uname=" + uname + "&body=" + URLEncoder.encode(body, "utf-8"))
                     this@PMActivity.runOnUiThread(object : Runnable {
 
                         override fun run() {
@@ -151,7 +150,6 @@ class PMActivity : AppCompatActivity(), PMFragment.PMFragmentListener, View.OnCl
         private val PMFRAGMENTID = "PMFRAGMENT"
     }
 }
-
-open class AppCompatActivity {
+class AppCompatActivity {
 
 }

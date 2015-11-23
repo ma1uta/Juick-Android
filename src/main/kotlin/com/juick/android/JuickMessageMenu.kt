@@ -180,7 +180,7 @@ class JuickMessageMenu(private var activity: Activity) : OnItemLongClickListener
 
             override fun run() {
                 try {
-                    val ret = Utils.postJSON(activity, "https://api.juick.com/post", "body=" + URLEncoder.encode(body, "utf-8"))
+                    val ret = postJSON(activity, "https://api.juick.com/post", "body=" + URLEncoder.encode(body, "utf-8"))
                     activity.runOnUiThread(object : Runnable {
 
                         override fun run() {

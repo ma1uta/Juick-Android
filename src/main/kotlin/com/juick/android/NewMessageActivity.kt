@@ -116,7 +116,7 @@ class NewMessageActivity : AppCompatActivity(), OnClickListener {
         jsonUrl += "?lat=" + loc.getLatitude() + "&lon=" + loc.getLongitude() + "&acc=" + loc.getAccuracy() + "&fixage=" + Math.round((System.currentTimeMillis() - loc.getTime()) / 1000);
         }
         
-        final String jsonStr = Utils.getJSON(NewMessageActivity.this, jsonUrl);
+        final String jsonStr = getJSON(NewMessageActivity.this, jsonUrl);
         
         NewMessageActivity.this.runOnUiThread(new Runnable() {
         
@@ -317,7 +317,7 @@ class NewMessageActivity : AppCompatActivity(), OnClickListener {
                 conn.requestMethod = "POST"
                 conn.setRequestProperty("Connection", "Keep-Alive")
                 conn.setRequestProperty("Charset", "UTF-8")
-                conn.setRequestProperty("Authorization", Utils.getBasicAuthString(context))
+                conn.setRequestProperty("Authorization", getBasicAuthString(context))
                 conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary)
 
                 var outStr = twoHyphens + boundary + end
@@ -345,7 +345,7 @@ class NewMessageActivity : AppCompatActivity(), OnClickListener {
                 val outStrEnd = twoHyphens + boundary + twoHyphens + end
                 val outStrEndB = outStrEnd.toByteArray()
 
-                var size = outStrB.size() + outStrEndB.size()
+                var size = outStrB.size + outStrEndB.size
 
                 var fileInput: FileInputStream? = null
                 if (attachmentUri != null && attachmentUri.length > 0) {

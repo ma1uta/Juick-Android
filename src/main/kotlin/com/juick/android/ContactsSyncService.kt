@@ -27,9 +27,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.SyncResult
-import android.database.Cursor
 import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
 import android.provider.BaseColumns
@@ -88,8 +86,7 @@ class ContactsSyncService : Service() {
             while (c1.moveToNext()) {
                 localContacts.put(c1.getString(1), c1.getLong(0))
             }
-
-            val jsonStr = Utils.getJSON(context, "https://api.juick.com/users/friends")
+            val jsonStr = getJSON(context, "https://api.juick.com/users/friends")
             if (jsonStr != null && jsonStr.length > 4) {
                 try {
                     val json = JSONArray(jsonStr)
@@ -134,7 +131,7 @@ class ContactsSyncService : Service() {
             }
 
             // Photo
-            val photo = Utils.downloadImage("http://i.juick.com/a/" + user.UID + ".png")
+            val photo = downloadImage("http://i.juick.com/a/" + user.UID + ".png")
             if (photo != null) {
                 val baos = ByteArrayOutputStream()
                 photo.compress(Bitmap.CompressFormat.PNG, 100, baos)

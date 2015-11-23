@@ -180,7 +180,7 @@ class MessagesFragment : ListFragment(), AdapterView.OnItemClickListener, AbsLis
         val thr = Thread(object : Runnable {
 
             override fun run() {
-                val jsonStr = Utils.getJSON(activity, apiurl!!)
+                val jsonStr = getJSON(activity, apiurl!!)
                 if (isAdded) {
                     activity.runOnUiThread(object : Runnable {
 
@@ -236,7 +236,7 @@ class MessagesFragment : ListFragment(), AdapterView.OnItemClickListener, AbsLis
         val thr = Thread(object : Runnable {
 
             override fun run() {
-                val jsonStr = Utils.getJSON(activity, apiurl + "&before_mid=" + before_mid)
+                val jsonStr = getJSON(activity, apiurl + "&before_mid=" + before_mid)
                 if (isAdded) {
                     activity.runOnUiThread(object : Runnable {
 

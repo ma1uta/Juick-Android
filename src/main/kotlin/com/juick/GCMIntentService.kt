@@ -22,7 +22,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.LocalBroadcastManager
@@ -30,8 +29,8 @@ import android.util.Log
 import com.google.android.gcm.GCMBaseIntentService
 import com.juick.android.MainActivity
 import com.juick.android.PMActivity
-import com.juick.android.Utils
 import com.juick.android.api.JuickMessage
+import com.juick.android.getJSON
 import java.net.URLEncoder
 import org.json.JSONObject
 
@@ -43,7 +42,7 @@ class GCMIntentService : GCMBaseIntentService(GCMIntentService.SENDER_ID) {
 
     override fun onRegistered(context: Context, regId: String) {
         try {
-            val res = Utils.getJSON(context, "https://api.juick.com/android/register?regid=" + URLEncoder.encode(regId, "UTF-8"))
+            val res = getJSON(context, "https://api.juick.com/android/register?regid=" + URLEncoder.encode(regId, "UTF-8"))
             if (res != null) {
                 val spe = PreferenceManager.getDefaultSharedPreferences(context).edit()
                 spe.putString("gcm_regid", regId)
@@ -56,7 +55,7 @@ class GCMIntentService : GCMBaseIntentService(GCMIntentService.SENDER_ID) {
 
     override fun onUnregistered(context: Context, regId: String) {
         try {
-            Utils.getJSON(context, "https://api.juick.com/android/unregister?regid=" + URLEncoder.encode(regId, "UTF-8"))
+            getJSON(context, "https://api.juick.com/android/unregister?regid=" + URLEncoder.encode(regId, "UTF-8"))
             val spe = PreferenceManager.getDefaultSharedPreferences(context).edit()
             spe.remove("gcm_regid")
             spe.commit()

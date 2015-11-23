@@ -163,7 +163,7 @@ class ThreadActivity : FragmentActivity(), View.OnClickListener, ThreadFragment.
 
             override fun run() {
                 try {
-                    val ret = Utils.postJSON(this@ThreadActivity, "https://api.juick.com/post", "body=" + URLEncoder.encode(body, "utf-8"))
+                    val ret = postJSON(this@ThreadActivity, "https://api.juick.com/post", "body=" + URLEncoder.encode(body, "utf-8"))
                     this@ThreadActivity.runOnUiThread(object : Runnable {
 
                         override fun run() {
