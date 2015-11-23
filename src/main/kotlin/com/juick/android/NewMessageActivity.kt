@@ -179,7 +179,7 @@ class NewMessageActivity : AppCompatActivity(), OnClickListener {
         }
     }
 
-    override fun onClick(v: View) {
+    override fun onClick(v: View?) {
         if (v === bTags) {
             val i = Intent(this, TagsActivity::class.java)
             i.setAction(Intent.ACTION_PICK)

@@ -87,7 +87,7 @@ class JuickMessagesAdapter(context: Context, private val type: Int) : ArrayAdapt
         return 0
     }
 
-    override fun getView(position: Int, convertView: View, parent: ViewGroup): View? {
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
         val jmsg = getItem(position)
         var v: View? = convertView
 

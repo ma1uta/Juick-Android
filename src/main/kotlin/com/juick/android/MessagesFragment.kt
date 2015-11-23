@@ -69,7 +69,7 @@ class MessagesFragment : ListFragment(), AdapterView.OnItemClickListener, AbsLis
     private var mLastMotionY: Int = 0
     private var mBounceHack: Boolean = false
 
-    override fun onCreate(savedInstanceState: Bundle) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         var home = false
@@ -158,7 +158,7 @@ class MessagesFragment : ListFragment(), AdapterView.OnItemClickListener, AbsLis
         loadData()
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle) {
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         listView.setOnTouchListener(this)
@@ -255,20 +255,20 @@ class MessagesFragment : ListFragment(), AdapterView.OnItemClickListener, AbsLis
         thr.start()
     }
 
-    override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+    override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         val i = Intent(activity, ThreadActivity::class.java)
-        i.putExtra("mid", (parent.getItemAtPosition(position) as JuickMessage).MID)
+        i.putExtra("mid", (parent?.getItemAtPosition(position) as JuickMessage).MID)
         startActivity(i)
     }
 
     // Refresh
-    override fun onClick(view: View) {
+    override fun onClick(view: View?) {
         mRefreshState = REFRESHING
         prepareForRefresh()
         loadData()
     }
 
-    override fun onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int) {
+    override fun onScroll(view: AbsListView?, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int) {
         if (visibleItemCount < totalItemCount && (firstVisibleItem + visibleItemCount == totalItemCount) && loading == false) {
             val before_mid = (listAdapter!!.getItem(listAdapter!!.count - 1) as JuickMessage).MID
             loadMore(before_mid)
@@ -304,10 +304,10 @@ class MessagesFragment : ListFragment(), AdapterView.OnItemClickListener, AbsLis
         }
     }
 
-    override fun onTouch(view: View, event: MotionEvent): Boolean {
+    override fun onTouch(view: View, event: MotionEvent?): Boolean {
         mBounceHack = false
 
-        when (event.action) {
+        when (event?.action) {
             MotionEvent.ACTION_UP -> {
                 if (!listView.isVerticalScrollBarEnabled) {
                     listView.setVerticalScrollBarEnabled(true)
@@ -323,8 +323,8 @@ class MessagesFragment : ListFragment(), AdapterView.OnItemClickListener, AbsLis
                     }
                 }
             }
-            MotionEvent.ACTION_DOWN -> mLastMotionY = event.y.toInt()
-            MotionEvent.ACTION_MOVE -> applyHeaderPadding(event)
+            MotionEvent.ACTION_DOWN -> mLastMotionY = event!!.y.toInt()
+            MotionEvent.ACTION_MOVE -> applyHeaderPadding(event!!)
         }
         return false
     }
@@ -384,7 +384,7 @@ class MessagesFragment : ListFragment(), AdapterView.OnItemClickListener, AbsLis
         }
     }
 
-    override fun onScrollStateChanged(view: AbsListView, scrollState: Int) {
+    override fun onScrollStateChanged(view: AbsListView?, scrollState: Int) {
         mCurrentScrollState = scrollState
 
         if (mCurrentScrollState == SCROLL_STATE_IDLE) {

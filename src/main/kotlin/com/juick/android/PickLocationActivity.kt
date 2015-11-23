@@ -38,7 +38,7 @@ class PickLocationActivity : MapActivity(), OnClickListener {
     private var myLocation: MyLocationOverlay? = null
     private var bOK: Button? = null
 
-    override protected fun onCreate(savedInstanceState: Bundle) {
+    override protected fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.map)
@@ -65,7 +65,7 @@ class PickLocationActivity : MapActivity(), OnClickListener {
         myLocation!!.disableMyLocation()
     }
 
-    override fun onClick(v: View) {
+    override fun onClick(v: View?) {
         val i = Intent()
         val center = mapView!!.mapCenter
         i.putExtra("lat", center.latitudeE6 / 1000000)
