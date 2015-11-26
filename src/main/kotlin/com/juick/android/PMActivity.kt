@@ -21,7 +21,6 @@ import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.os.Vibrator
 import android.preference.PreferenceManager
@@ -31,7 +30,6 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import com.juick.GCMIntentService
 import com.juick.R
 import java.net.URLEncoder
 import android.support.v7.app.AppCompatActivity
@@ -42,6 +40,7 @@ import android.support.v4.content.LocalBroadcastManager
  * @author ugnich
  */
 class PMActivity : AppCompatActivity(), PMFragment.PMFragmentListener, View.OnClickListener {
+    private val PMFRAGMENTID = "PMFRAGMENT"
     private var uname: String? = null
     private var uid: Int = 0
     private var etMessage: EditText? = null
@@ -52,9 +51,9 @@ class PMActivity : AppCompatActivity(), PMFragment.PMFragmentListener, View.OnCl
             (context.getSystemService(Activity.VIBRATOR_SERVICE) as Vibrator).vibrate(250)
             val message = intent.getStringExtra("message")
             if (message[0] == '{') {
-                (getSupportFragmentManager().findFragmentByTag(PMFRAGMENTID) as PMFragment).onNewMessages("[$message]")
+                (supportFragmentManager.findFragmentByTag(PMFRAGMENTID) as PMFragment).onNewMessages("[$message]")
             } else {
-                (getSupportFragmentManager().findFragmentByTag(PMFRAGMENTID) as PMFragment).onNewMessages(message)
+                (supportFragmentManager.findFragmentByTag(PMFRAGMENTID) as PMFragment).onNewMessages(message)
             }
         }
     }
@@ -62,12 +61,12 @@ class PMActivity : AppCompatActivity(), PMFragment.PMFragmentListener, View.OnCl
     override protected fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        uname = getIntent().getStringExtra("uname")
-        uid = getIntent().getIntExtra("uid", 0)
+        uname = intent.getStringExtra("uname")
+        uid = intent.getIntExtra("uid", 0)
 
-        val bar = getSupportActionBar()
+        val bar = supportActionBar
         bar.setDisplayHomeAsUpEnabled(true)
-        bar.setTitle(uname)
+        bar.title = uname
 
         setContentView(R.layout.pm)
 
@@ -75,12 +74,12 @@ class PMActivity : AppCompatActivity(), PMFragment.PMFragmentListener, View.OnCl
         bSend = findViewById(R.id.buttonSend) as Button
         bSend!!.setOnClickListener(this)
 
-        val ft = getSupportFragmentManager().beginTransaction()
+        val ft = supportFragmentManager.beginTransaction()
         val pf = PMFragment()
         val args = Bundle()
         args.putString("uname", uname)
         args.putInt("uid", uid)
-        pf.setArguments(args)
+        pf.arguments = args
         ft.add(R.id.pmfragment, pf, PMFRAGMENTID)
         ft.commit()
     }
@@ -107,7 +106,7 @@ class PMActivity : AppCompatActivity(), PMFragment.PMFragmentListener, View.OnCl
                         override fun run() {
                             if (ret != null) {
                                 etMessage!!.setText("")
-                                (getSupportFragmentManager().findFragmentByTag(PMFRAGMENTID) as PMFragment).onNewMessages("[$ret]")
+                                (supportFragmentManager.findFragmentByTag(PMFRAGMENTID) as PMFragment).onNewMessages("[$ret]")
                             } else {
                                 Toast.makeText(this@PMActivity, R.string.Error, Toast.LENGTH_SHORT).show()
                             }
@@ -126,7 +125,7 @@ class PMActivity : AppCompatActivity(), PMFragment.PMFragmentListener, View.OnCl
         val spe = PreferenceManager.getDefaultSharedPreferences(this).edit()
         if (hasFocus) {
             spe.putString("currentactivity", "pm-" + uid)
-            LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, IntentFilter(GCMIntentService.GCMEVENTACTION))
+            // LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, IntentFilter(GCMIntentService.GCMEVENTACTION))
         } else {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver)
             spe.remove("currentactivity")
@@ -144,12 +143,5 @@ class PMActivity : AppCompatActivity(), PMFragment.PMFragmentListener, View.OnCl
         }
         return super.onOptionsItemSelected(item)
     }
-
-    companion object {
-
-        private val PMFRAGMENTID = "PMFRAGMENT"
-    }
-}
-class AppCompatActivity {
 
 }

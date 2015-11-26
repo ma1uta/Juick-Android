@@ -22,7 +22,6 @@ import android.os.Bundle
 import android.view.View
 import android.view.View.OnClickListener
 import android.widget.Button
-// import com.google.android.maps.GeoPoint
 import com.google.android.maps.MapActivity
 import com.google.android.maps.MapView
 import com.google.android.maps.MyLocationOverlay

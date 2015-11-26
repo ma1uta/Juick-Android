@@ -18,28 +18,34 @@
 package com.juick.android
 
 import android.app.Activity
+import android.content.Context
 import android.support.design.widget.TabLayout
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
-import com.juick.GCMIntentService
 import android.content.Intent
-// import android.content.SharedPreferences
 import android.net.Uri
+import android.os.AsyncTask
 import android.os.Bundle
 import android.preference.PreferenceManager
-// import android.support.v4.app.Fragment
-// import android.support.v4.app.FragmentTransaction
 import android.util.Log
-import com.google.android.gcm.GCMRegistrar
+import com.google.android.gms.gcm.GoogleCloudMessaging
+import com.google.android.gms.iid.InstanceID
 import com.juick.R
+import org.jetbrains.anko.async
+import java.net.URLEncoder
 
 /**
 
  * @author Ugnich Anton
  */
+
+val JUICK_TAG = "Juick.com"
+val ACTIVITY_SIGNIN = 2
+val ACTIVITY_PREFERENCES = 3
+
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,17 +65,26 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        try {
-            GCMRegistrar.checkDevice(this)
-            GCMRegistrar.checkManifest(this)
-            val regId = GCMRegistrar.getRegistrationId(this)
-            val sp = PreferenceManager.getDefaultSharedPreferences(this)
-            val prefRegId = sp.getString("gcm_regid", null)
-            if (regId.length == 0 || regId != prefRegId) {
-                GCMRegistrar.register(this, GCMIntentService.SENDER_ID)
+        val context = this as Context
+
+        async {
+            try {
+                val instanceID = InstanceID.getInstance(context)
+                val token = instanceID.getToken(SENDER_ID, GoogleCloudMessaging.INSTANCE_ID_SCOPE, null)
+                val sp = PreferenceManager.getDefaultSharedPreferences(context)
+                val prefRegId = sp.getString("gcm_regid", null)
+                if (token.length == 0 || token != prefRegId) {
+                    val res = getJSON(context, "https://api.juick.com/android/register?regid=" + URLEncoder.encode(token, "UTF-8"))
+                    if (res != null) {
+                        val spe = PreferenceManager.getDefaultSharedPreferences(context).edit()
+                        spe.putString("gcm_regid", token)
+                        spe.commit()
+                    }
+                    Log.d(JUICK_TAG,    "GCM token $(token)")
+                }
+            } catch (e: Exception) {
+                Log.e(JUICK_TAG, e.toString())
             }
-        } catch (e: Exception) {
-            Log.e("Juick.GCM", e.toString())
         }
 
         setContentView(R.layout.main)
@@ -142,12 +157,5 @@ class MainActivity : AppCompatActivity() {
             //TODO show user
         }
         return false
-    }
-
-    companion object {
-
-        val ACTIVITY_SIGNIN = 2
-        val ACTIVITY_PREFERENCES = 3
-        val PENDINGINTENT_CONSTANT = 713242183
     }
 }
