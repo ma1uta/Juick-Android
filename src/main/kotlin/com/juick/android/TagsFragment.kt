@@ -27,6 +27,7 @@ import android.widget.AdapterView
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.AdapterView.OnItemLongClickListener
 import android.widget.ArrayAdapter
+import org.jetbrains.anko.async
 import org.json.JSONArray
 
 /**
@@ -59,39 +60,35 @@ class TagsFragment : ListFragment(), OnItemClickListener, OnItemLongClickListene
         listView.onItemClickListener = this
         listView.onItemLongClickListener = this
 
-        val thr = Thread(object : Runnable {
-
-            override fun run() {
-                var url = "https://api.juick.com/tags"
-                if (uid != 0) {
-                    url += "?user_id=" + uid
-                }
-                val jsonStr = getJSON(activity, url)
-                if (isAdded) {
-                    activity.runOnUiThread(object : Runnable {
-
-                        override fun run() {
-                            if (jsonStr != null) {
-                                try {
-                                    val listAdapter = ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1)
-
-                                    val json = JSONArray(jsonStr)
-                                    val cnt = json.length()
-                                    for (i in 0..cnt - 1) {
-                                        listAdapter.add(json.getJSONObject(i).getString("tag"))
-                                    }
-                                    setListAdapter(listAdapter)
-                                } catch (e: Exception) {
-                                    Log.e("initTagsAdapter", e.toString())
-                                }
-
-                            }
-                        }
-                    })
-                }
+        async {
+            var url = "https://api.juick.com/tags"
+            if (uid != 0) {
+                url += "?user_id=" + uid
             }
-        })
-        thr.start()
+            val jsonStr = getJSON(activity, url)
+            if (isAdded) {
+                activity.runOnUiThread(object : Runnable {
+
+                    override fun run() {
+                        if (jsonStr != null) {
+                            try {
+                                val listAdapter = ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1)
+
+                                val json = JSONArray(jsonStr)
+                                val cnt = json.length()
+                                for (i in 0..cnt - 1) {
+                                    listAdapter.add(json.getJSONObject(i).getString("tag"))
+                                }
+                                setListAdapter(listAdapter)
+                            } catch (e: Exception) {
+                                Log.e("initTagsAdapter", e.toString())
+                            }
+
+                        }
+                    }
+                })
+            }
+        }
     }
 
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {

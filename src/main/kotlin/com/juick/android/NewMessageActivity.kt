@@ -35,6 +35,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
 import com.juick.R
+import org.jetbrains.anko.async
 import java.io.FileInputStream
 import java.net.HttpURLConnection
 import java.net.URL
@@ -106,7 +107,7 @@ class NewMessageActivity : AppCompatActivity(), OnClickListener {
         /*
         setProgressBarIndeterminateVisibility(true);
         Thread thr = new Thread(new Runnable() {
-        
+
         public void run() {
         String jsonUrl = "http://api.juick.com/postform";
         
@@ -234,39 +235,36 @@ class NewMessageActivity : AppCompatActivity(), OnClickListener {
                 progressDialog!!.max = 0
                 progressDialog!!.show()
             }
-            val thr = Thread(object : Runnable {
+            async {
+                val res = sendMessage(this@NewMessageActivity, msg, lat, lon, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel)
+                this@NewMessageActivity.runOnUiThread(object : Runnable {
 
-                override fun run() {
-                    val res = sendMessage(this@NewMessageActivity, msg, lat, lon, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel)
-                    this@NewMessageActivity.runOnUiThread(object : Runnable {
-
-                        override fun run() {
-                            if (progressDialog != null) {
-                                progressDialog!!.dismiss()
-                            }
-                            setFormEnabled(true)
-                            if (res) {
-                                resetForm()
-                            }
-                            if ((res && attachmentUri == null) || this@NewMessageActivity.isFinishing) {
-                                Toast.makeText(this@NewMessageActivity, if (res) R.string.Message_posted else R.string.Error, Toast.LENGTH_LONG).show()
-                            } else {
-                                val builder = AlertDialog.Builder(this@NewMessageActivity)
-                                builder.setNeutralButton(R.string.OK, null)
-                                if (res) {
-                                    builder.setIcon(android.R.drawable.ic_dialog_info)
-                                    builder.setMessage(R.string.Message_posted)
-                                } else {
-                                    builder.setIcon(android.R.drawable.ic_dialog_alert)
-                                    builder.setMessage(R.string.Error)
-                                }
-                                builder.show()
-                            }
+                    override fun run() {
+                        if (progressDialog != null) {
+                            progressDialog!!.dismiss()
                         }
-                    })
-                }
-            })
-            thr.start()
+                        setFormEnabled(true)
+                        if (res) {
+                            resetForm()
+                        }
+                        if ((res && attachmentUri == null) || this@NewMessageActivity.isFinishing) {
+                            Toast.makeText(this@NewMessageActivity, if (res) R.string.Message_posted else R.string.Error, Toast.LENGTH_LONG).show()
+                        } else {
+                            val builder = AlertDialog.Builder(this@NewMessageActivity)
+                            builder.setNeutralButton(R.string.OK, null)
+                            if (res) {
+                                builder.setIcon(android.R.drawable.ic_dialog_info)
+                                builder.setMessage(R.string.Message_posted)
+                            } else {
+                                builder.setIcon(android.R.drawable.ic_dialog_alert)
+                                builder.setMessage(R.string.Error)
+                            }
+                            builder.show()
+                        }
+                    }
+                })
+            }
+
             return true
         } else if (item.itemId == android.R.id.home) {
             finish()

@@ -30,6 +30,7 @@ import android.widget.AdapterView.OnItemLongClickListener
 import android.widget.Toast
 import com.juick.R
 import com.juick.android.api.JuickMessage
+import org.jetbrains.anko.async
 import java.net.URLEncoder
 import java.util.ArrayList
 // import java.util.regex.Matcher
@@ -176,23 +177,19 @@ class JuickMessageMenu(private var activity: Activity) : OnItemLongClickListener
     }
 
     private fun postMessage(body: String, ok: String) {
-        val thr = Thread(object : Runnable {
+        async {
+            try {
+                val ret = postJSON(activity, "https://api.juick.com/post", "body=" + URLEncoder.encode(body, "utf-8"))
+                activity.runOnUiThread(object : Runnable {
 
-            override fun run() {
-                try {
-                    val ret = postJSON(activity, "https://api.juick.com/post", "body=" + URLEncoder.encode(body, "utf-8"))
-                    activity.runOnUiThread(object : Runnable {
-
-                        override fun run() {
-                            Toast.makeText(activity, if ((ret != null)) ok else activity.getResources().getString(R.string.Error), Toast.LENGTH_SHORT).show()
-                        }
-                    })
-                } catch (e: Exception) {
-                    Log.e("postMessage", e.toString())
-                }
-
+                    override fun run() {
+                        Toast.makeText(activity, if ((ret != null)) ok else activity.getResources().getString(R.string.Error), Toast.LENGTH_SHORT).show()
+                    }
+                })
+            } catch (e: Exception) {
+                Log.e("postMessage", e.toString())
             }
-        })
-        thr.start()
+
+        }
     }
 }

@@ -29,6 +29,7 @@ import android.widget.ArrayAdapter
 import android.widget.TextView
 import com.juick.R
 import com.juick.android.api.JuickMessage
+import org.jetbrains.anko.async
 import org.json.JSONArray
 
 /**
@@ -61,17 +62,13 @@ class PMFragment : ListFragment() {
         listAdapter = PMAdapter(activity, uid)
         listView.dividerHeight = 0
 
-        val thr = Thread(object : Runnable {
-
-            override fun run() {
-                val url = "https://api.juick.com/pm?uname=" + uname!!
-                val jsonStr = getJSON(activity, url)
-                if (isAdded) {
-                    onNewMessages(jsonStr)
-                }
+        async {
+            val url = "https://api.juick.com/pm?uname=" + uname!!
+            val jsonStr = getJSON(activity, url)
+            if (isAdded) {
+                onNewMessages(jsonStr)
             }
-        })
-        thr.start()
+        }
     }
 
     fun onNewMessages(msg: String?) {

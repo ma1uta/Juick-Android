@@ -35,6 +35,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.juick.R
+import org.jetbrains.anko.async
 // import org.json.JSONArray
 import org.json.JSONObject
 
@@ -61,35 +62,31 @@ class ChatsFragment : ListFragment(), OnItemClickListener {
 
         }
 
-        val thr = Thread(object : Runnable {
+        async {
+            val url = "https://api.juick.com/groups_pms?cnt=10"
+            val jsonStr = getJSON(activity, url)
+            if (isAdded() && jsonStr != null && (jcacheMain == null || jsonStr != jcacheMain)) {
+                activity.runOnUiThread(object : Runnable {
 
-            override fun run() {
-                val url = "https://api.juick.com/groups_pms?cnt=10"
-                val jsonStr = getJSON(activity, url)
-                if (isAdded() && jsonStr != null && (jcacheMain == null || jsonStr != jcacheMain)) {
-                    activity.runOnUiThread(object : Runnable {
-
-                        override fun run() {
-                            try {
-                                var listAdapter: ChatsAdapter? = listAdapter as ChatsAdapter
-                                if (listAdapter == null) {
-                                    listAdapter = ChatsAdapter(activity)
-                                }
-                                listAdapter.parseJSON(jsonStr)
-                                setListAdapter(listAdapter)
-
-                                val spe = PreferenceManager.getDefaultSharedPreferences(activity).edit()
-                                spe.putString("jcache_main", jsonStr)
-                                spe.commit()
-                            } catch (e: Exception) {
+                    override fun run() {
+                        try {
+                            var listAdapter: ChatsAdapter? = listAdapter as ChatsAdapter
+                            if (listAdapter == null) {
+                                listAdapter = ChatsAdapter(activity)
                             }
+                            listAdapter.parseJSON(jsonStr)
+                            setListAdapter(listAdapter)
 
+                            val spe = PreferenceManager.getDefaultSharedPreferences(activity).edit()
+                            spe.putString("jcache_main", jsonStr)
+                            spe.commit()
+                        } catch (e: Exception) {
                         }
-                    })
-                }
+
+                    }
+                })
             }
-        })
-        thr.start()
+        }
     }
 
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {

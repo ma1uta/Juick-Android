@@ -34,6 +34,7 @@ import com.juick.R
 import java.net.URLEncoder
 import android.support.v7.app.AppCompatActivity
 import android.support.v4.content.LocalBroadcastManager
+import org.jetbrains.anko.async
 
 /**
 
@@ -96,29 +97,25 @@ class PMActivity : AppCompatActivity(), PMFragment.PMFragmentListener, View.OnCl
     }
 
     fun postText(body: String) {
-        val thr = Thread(object : Runnable {
+        async {
+            try {
+                val ret = postJSON(this@PMActivity, "https://api.juick.com/pm", "uname=" + uname + "&body=" + URLEncoder.encode(body, "utf-8"))
+                this@PMActivity.runOnUiThread(object : Runnable {
 
-            override fun run() {
-                try {
-                    val ret = postJSON(this@PMActivity, "https://api.juick.com/pm", "uname=" + uname + "&body=" + URLEncoder.encode(body, "utf-8"))
-                    this@PMActivity.runOnUiThread(object : Runnable {
-
-                        override fun run() {
-                            if (ret != null) {
-                                etMessage!!.setText("")
-                                (supportFragmentManager.findFragmentByTag(PMFRAGMENTID) as PMFragment).onNewMessages("[$ret]")
-                            } else {
-                                Toast.makeText(this@PMActivity, R.string.Error, Toast.LENGTH_SHORT).show()
-                            }
+                    override fun run() {
+                        if (ret != null) {
+                            etMessage!!.setText("")
+                            (supportFragmentManager.findFragmentByTag(PMFRAGMENTID) as PMFragment).onNewMessages("[$ret]")
+                        } else {
+                            Toast.makeText(this@PMActivity, R.string.Error, Toast.LENGTH_SHORT).show()
                         }
-                    })
-                } catch (e: Exception) {
-                    Log.e("postPM", e.toString())
-                }
-
+                    }
+                })
+            } catch (e: Exception) {
+                Log.e("postPM", e.toString())
             }
-        })
-        thr.start()
+
+        }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

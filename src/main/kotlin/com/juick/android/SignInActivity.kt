@@ -34,6 +34,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import com.juick.R
+import org.jetbrains.anko.async
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -91,46 +92,42 @@ class SignInActivity : Activity(), OnClickListener {
 
         Toast.makeText(this, R.string.Please_wait___, Toast.LENGTH_SHORT).show()
 
-        val thr = Thread(object : Runnable {
+        async {
+            var status = 0
+            try {
+                val authStr = nick + ":" + password
+                val basicAuth = "Basic " + Base64.encodeToString(authStr.toByteArray(), Base64.NO_WRAP)
 
-            override fun run() {
-                var status = 0
-                try {
-                    val authStr = nick + ":" + password
-                    val basicAuth = "Basic " + Base64.encodeToString(authStr.toByteArray(), Base64.NO_WRAP)
-
-                    val apiUrl = URL("https://api.juick.com/post")
-                    val conn = apiUrl.openConnection() as HttpURLConnection
-                    conn.useCaches = false
-                    conn.requestMethod = "POST"
-                    conn.setRequestProperty("Authorization", basicAuth)
-                    conn.connect()
-                    status = conn.responseCode
-                    conn.disconnect()
-                } catch (e: Exception) {
-                    Log.e("checkingNickPassw", e.toString())
-                }
-
-                if (status == 400) {
-                    val account = Account(nick, getString(R.string.com_juick))
-                    val am = AccountManager.get(this@SignInActivity)
-                    val accountCreated = am.addAccountExplicitly(account, password, null)
-                    val extras = intent.extras
-                    if (extras != null && accountCreated) {
-                        val response = extras.getParcelable<AccountAuthenticatorResponse>(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
-                        val result = Bundle()
-                        result.putString(AccountManager.KEY_ACCOUNT_NAME, nick)
-                        result.putString(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.com_juick))
-                        response.onResult(result)
-                    }
-
-                    this@SignInActivity.setResult(Activity.RESULT_OK)
-                    this@SignInActivity.finish()
-                } else {
-                    handlErrToast.sendEmptyMessage(0)
-                }
+                val apiUrl = URL("https://api.juick.com/post")
+                val conn = apiUrl.openConnection() as HttpURLConnection
+                conn.useCaches = false
+                conn.requestMethod = "POST"
+                conn.setRequestProperty("Authorization", basicAuth)
+                conn.connect()
+                status = conn.responseCode
+                conn.disconnect()
+            } catch (e: Exception) {
+                Log.e("checkingNickPassw", e.toString())
             }
-        })
-        thr.start()
+
+            if (status == 400) {
+                val account = Account(nick, getString(R.string.com_juick))
+                val am = AccountManager.get(this@SignInActivity)
+                val accountCreated = am.addAccountExplicitly(account, password, null)
+                val extras = intent.extras
+                if (extras != null && accountCreated) {
+                    val response = extras.getParcelable<AccountAuthenticatorResponse>(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
+                    val result = Bundle()
+                    result.putString(AccountManager.KEY_ACCOUNT_NAME, nick)
+                    result.putString(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.com_juick))
+                    response.onResult(result)
+                }
+
+                this@SignInActivity.setResult(Activity.RESULT_OK)
+                this@SignInActivity.finish()
+            } else {
+                handlErrToast.sendEmptyMessage(0)
+            }
+        }
     }
 }

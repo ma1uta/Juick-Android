@@ -18,7 +18,6 @@
 package com.juick.android
 
 import android.app.Activity
-import android.os.AsyncTask
 import com.juick.android.api.JuickMessage
 import android.os.Bundle
 import android.os.Vibrator
@@ -27,6 +26,7 @@ import android.view.View
 import android.widget.AdapterView
 import com.juick.R
 import com.neovisionaries.ws.client.*
+import org.jetbrains.anko.async
 
 import java.io.IOException
 import java.net.URI
@@ -74,43 +74,41 @@ class ThreadFragment : ListFragment(), AdapterView.OnItemClickListener {
 
     private fun initWebSocket() {
         if (ws == null) {
-            AsyncTask.execute(object : Runnable {
-                override fun run() {
-                    try {
-                        ws = wsFactory!!.createSocket(URI("wss", "ws.juick.com", "/" + mid, null))
-                        ws!!.addHeader("Origin", "ws.juick.com")
-                        ws!!.addHeader("Host", "ws.juick.com") //TODO: remove from server side
-                        ws!!.addListener(object : WebSocketAdapter() {
-                            @Throws(Exception::class)
-                            override fun onTextMessage(websocket: WebSocket?, jsonStr: String?) {
-                                super.onTextMessage(websocket, jsonStr)
-                                if (!isAdded) {
-                                    return
-                                }
-                                (activity.getSystemService(Activity.VIBRATOR_SERVICE) as Vibrator).vibrate(250)
-                                activity.runOnUiThread(object : Runnable {
-
-                                    override fun run() {
-                                        if (jsonStr != null) {
-                                            listAdapter!!.parseJSON("[$jsonStr]")
-                                            listAdapter!!.getItem(1).Text = resources.getString(R.string.Replies) + " (" + Integer.toString(listAdapter!!.count - 2) + ")"
-                                        }
-                                    }
-                                })
+            async {
+                try {
+                    ws = wsFactory!!.createSocket(URI("wss", "ws.juick.com", "/" + mid, null))
+                    ws!!.addHeader("Origin", "ws.juick.com")
+                    ws!!.addHeader("Host", "ws.juick.com") //TODO: remove from server side
+                    ws!!.addListener(object : WebSocketAdapter() {
+                        @Throws(Exception::class)
+                        override fun onTextMessage(websocket: WebSocket?, jsonStr: String?) {
+                            super.onTextMessage(websocket, jsonStr)
+                            if (!isAdded) {
+                                return
                             }
-                        })
-                    } catch (e: IOException) {
-                        e.printStackTrace()
-                    } catch (e: URISyntaxException) {
-                        e.printStackTrace()
-                    }
+                            (activity.getSystemService(Activity.VIBRATOR_SERVICE) as Vibrator).vibrate(250)
+                            activity.runOnUiThread(object : Runnable {
 
-                    ws!!.connectAsynchronously()
+                                override fun run() {
+                                    if (jsonStr != null) {
+                                        listAdapter!!.parseJSON("[$jsonStr]")
+                                        listAdapter!!.getItem(1).Text = resources.getString(R.string.Replies) + " (" + Integer.toString(listAdapter!!.count - 2) + ")"
+                                    }
+                                }
+                            })
+                        }
+                    })
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                } catch (e: URISyntaxException) {
+                    e.printStackTrace()
                 }
-            })
 
+                ws!!.connectAsynchronously()
+            }
         }
     }
+
 
     private fun initAdapter() {
         listAdapter = JuickMessagesAdapter(activity, JuickMessagesAdapter.TYPE_THREAD)
@@ -118,27 +116,23 @@ class ThreadFragment : ListFragment(), AdapterView.OnItemClickListener {
         listView.onItemClickListener = this
         listView.onItemLongClickListener = JuickMessageMenu(activity)
 
-        val thr = Thread(object : Runnable {
+        async {
+            val jsonStr = getJSON(activity, "https://api.juick.com/thread?mid=" + mid)
+            if (isAdded) {
+                activity.runOnUiThread(object : Runnable {
 
-            override fun run() {
-                val jsonStr = getJSON(activity, "https://api.juick.com/thread?mid=" + mid)
-                if (isAdded) {
-                    activity.runOnUiThread(object : Runnable {
-
-                        override fun run() {
-                            if (jsonStr != null) {
-                                listAdapter!!.parseJSON(jsonStr)
-                                setListAdapter(listAdapter)
-                                if (listAdapter!!.count > 0) {
-                                    initAdapterStageTwo()
-                                }
+                    override fun run() {
+                        if (jsonStr != null) {
+                            listAdapter!!.parseJSON(jsonStr)
+                            setListAdapter(listAdapter)
+                            if (listAdapter!!.count > 0) {
+                                initAdapterStageTwo()
                             }
                         }
-                    })
-                }
+                    }
+                })
             }
-        })
-        thr.start()
+        }
     }
 
     private fun initAdapterStageTwo() {

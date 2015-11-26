@@ -42,6 +42,7 @@ import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
 import com.juick.R
+import org.jetbrains.anko.async
 import java.net.URLEncoder
 
 /**
@@ -177,21 +178,17 @@ class MessagesFragment : ListFragment(), AdapterView.OnItemClickListener, AbsLis
 
     private fun loadData() {
         loading = true
-        val thr = Thread(object : Runnable {
+        async {
+            val jsonStr = getJSON(activity, apiurl!!)
+            if (isAdded) {
+                activity.runOnUiThread(object : Runnable {
 
-            override fun run() {
-                val jsonStr = getJSON(activity, apiurl!!)
-                if (isAdded) {
-                    activity.runOnUiThread(object : Runnable {
-
-                        override fun run() {
-                            processData(jsonStr)
-                        }
-                    })
-                }
+                    override fun run() {
+                        processData(jsonStr)
+                    }
+                })
             }
-        })
-        thr.start()
+        }
     }
 
     private fun processData(jsonStr: String?) {
@@ -233,26 +230,22 @@ class MessagesFragment : ListFragment(), AdapterView.OnItemClickListener, AbsLis
 
     private fun loadMore(before_mid: Int) {
         loading = true
-        val thr = Thread(object : Runnable {
+        async {
+            val jsonStr = getJSON(activity, apiurl + "&before_mid=" + before_mid)
+            if (isAdded) {
+                activity.runOnUiThread(object : Runnable {
 
-            override fun run() {
-                val jsonStr = getJSON(activity, apiurl + "&before_mid=" + before_mid)
-                if (isAdded) {
-                    activity.runOnUiThread(object : Runnable {
-
-                        override fun run() {
-                            if (jsonStr == null || listAdapter!!.parseJSON(jsonStr) != 20) {
-                                if (this@MessagesFragment.listView.footerViewsCount > 0) {
-                                    this@MessagesFragment.listView.removeFooterView(viewLoading)
-                                }
+                    override fun run() {
+                        if (jsonStr == null || listAdapter!!.parseJSON(jsonStr) != 20) {
+                            if (this@MessagesFragment.listView.footerViewsCount > 0) {
+                                this@MessagesFragment.listView.removeFooterView(viewLoading)
                             }
-                            loading = false
                         }
-                    })
-                }
+                        loading = false
+                    }
+                })
             }
-        })
-        thr.start()
+        }
     }
 
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {

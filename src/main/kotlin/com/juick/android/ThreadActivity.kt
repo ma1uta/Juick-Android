@@ -37,6 +37,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import com.juick.R
+import org.jetbrains.anko.async
 import java.net.URLEncoder
 
 /**
@@ -159,30 +160,26 @@ class ThreadActivity : FragmentActivity(), View.OnClickListener, ThreadFragment.
     }
 
     fun postText(body: String) {
-        val thr = Thread(object : Runnable {
+        async {
+            try {
+                val ret = postJSON(this@ThreadActivity, "https://api.juick.com/post", "body=" + URLEncoder.encode(body, "utf-8"))
+                this@ThreadActivity.runOnUiThread(object : Runnable {
 
-            override fun run() {
-                try {
-                    val ret = postJSON(this@ThreadActivity, "https://api.juick.com/post", "body=" + URLEncoder.encode(body, "utf-8"))
-                    this@ThreadActivity.runOnUiThread(object : Runnable {
-
-                        override fun run() {
-                            if (ret != null) {
-                                Toast.makeText(this@ThreadActivity, R.string.Message_posted, Toast.LENGTH_SHORT).show()
-                                resetForm()
-                            } else {
-                                Toast.makeText(this@ThreadActivity, R.string.Error, Toast.LENGTH_SHORT).show()
-                                setFormEnabled(true)
-                            }
+                    override fun run() {
+                        if (ret != null) {
+                            Toast.makeText(this@ThreadActivity, R.string.Message_posted, Toast.LENGTH_SHORT).show()
+                            resetForm()
+                        } else {
+                            Toast.makeText(this@ThreadActivity, R.string.Error, Toast.LENGTH_SHORT).show()
+                            setFormEnabled(true)
                         }
-                    })
-                } catch (e: Exception) {
-                    Log.e("postComment", e.toString())
-                }
-
+                    }
+                })
+            } catch (e: Exception) {
+                Log.e("postComment", e.toString())
             }
-        })
-        thr.start()
+
+        }
     }
 
     fun postMedia(body: String) {
@@ -197,39 +194,35 @@ class ThreadActivity : FragmentActivity(), View.OnClickListener, ThreadFragment.
         progressDialog!!.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
         progressDialog!!.max = 0
         progressDialog!!.show()
-        val thr = Thread(object : Runnable {
+        async {
+            val res = NewMessageActivity.sendMessage(this@ThreadActivity, body, 0.0, 0.0, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel)
+            this@ThreadActivity.runOnUiThread(object : Runnable {
 
-            override fun run() {
-                val res = NewMessageActivity.sendMessage(this@ThreadActivity, body, 0.0, 0.0, attachmentUri, attachmentMime, progressDialog, progressHandler, progressDialogCancel)
-                this@ThreadActivity.runOnUiThread(object : Runnable {
-
-                    override fun run() {
-                        if (progressDialog != null) {
-                            progressDialog!!.dismiss()
-                        }
-                        setFormEnabled(true)
-                        if (res) {
-                            resetForm()
-                        }
-                        if (res && attachmentUri == null) {
-                            Toast.makeText(this@ThreadActivity, R.string.Message_posted, Toast.LENGTH_LONG).show()
-                        } else {
-                            val builder = AlertDialog.Builder(this@ThreadActivity)
-                            builder.setNeutralButton(R.string.OK, null)
-                            if (res) {
-                                builder.setIcon(android.R.drawable.ic_dialog_info)
-                                builder.setMessage(R.string.Message_posted)
-                            } else {
-                                builder.setIcon(android.R.drawable.ic_dialog_alert)
-                                builder.setMessage(R.string.Error)
-                            }
-                            builder.show()
-                        }
+                override fun run() {
+                    if (progressDialog != null) {
+                        progressDialog!!.dismiss()
                     }
-                })
-            }
-        })
-        thr.start()
+                    setFormEnabled(true)
+                    if (res) {
+                        resetForm()
+                    }
+                    if (res && attachmentUri == null) {
+                        Toast.makeText(this@ThreadActivity, R.string.Message_posted, Toast.LENGTH_LONG).show()
+                    } else {
+                        val builder = AlertDialog.Builder(this@ThreadActivity)
+                        builder.setNeutralButton(R.string.OK, null)
+                        if (res) {
+                            builder.setIcon(android.R.drawable.ic_dialog_info)
+                            builder.setMessage(R.string.Message_posted)
+                        } else {
+                            builder.setIcon(android.R.drawable.ic_dialog_alert)
+                            builder.setMessage(R.string.Error)
+                        }
+                        builder.show()
+                    }
+                }
+            })
+        }
     }
 
     override protected fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
