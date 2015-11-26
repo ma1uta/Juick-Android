@@ -22,9 +22,8 @@ apply plugin: 'com.google.gms.google-services'
 apply plugin: 'kotlin-android'
 
 android {
-    buildToolsVersion "23.0.1"
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion "23.0.2"
     defaultConfig {
          applicationId 'com.juick'
         minSdkVersion 9
