@@ -66,7 +66,7 @@ class ThreadActivity : FragmentActivity(), View.OnClickListener, ThreadFragment.
         }
     }
 
-    override protected fun onCreate(savedInstanceState: Bundle) {
+    override protected fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val i = intent
@@ -124,7 +124,7 @@ class ThreadActivity : FragmentActivity(), View.OnClickListener, ThreadFragment.
         }
     }
 
-    override fun onClick(view: View) {
+    override fun onClick(view: View?) {
         if (view === bAttach) {
             if (attachmentUri == null) {
                 val intent = Intent(Intent.ACTION_GET_CONTENT)
@@ -187,7 +187,7 @@ class ThreadActivity : FragmentActivity(), View.OnClickListener, ThreadFragment.
         progressDialogCancel.bool = false
         progressDialog!!.setOnCancelListener(object : DialogInterface.OnCancelListener {
 
-            override fun onCancel(arg0: DialogInterface) {
+            override fun onCancel(arg0: DialogInterface?) {
                 this@ThreadActivity.progressDialogCancel.bool = true
             }
         })
