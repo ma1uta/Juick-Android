@@ -19,10 +19,10 @@ import org.json.JSONObject
 import java.net.URLEncoder
 import com.juick.R
 
-val SENDER_ID = "314097120259"
+val SENDER_ID = "661985690018"
 val GCMEVENTACTION = "com.juick.android.gcm-event"
 
-class GCMReceriverService : GcmListenerService() {
+class GCMReceiverService : GcmListenerService() {
     override fun onMessageReceived(from: String?, data: Bundle?) {
         Log.d(JUICK_TAG, "onMessageReceived")
 
