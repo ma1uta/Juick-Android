@@ -17,7 +17,6 @@
  */
 package com.juick.android
 
-// import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.ListFragment
@@ -43,7 +42,7 @@ class PMFragment : ListFragment() {
     private var uname: String? = null
     private var uid: Int = 0
 
-    override fun onAttach(context: Context) {
+    override fun onAttach(context: Context?) {
         super.onAttach(context)
         try {
             parentActivity = activity as PMFragmentListener?
@@ -53,7 +52,7 @@ class PMFragment : ListFragment() {
 
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle) {
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         uname = arguments.getString("uname")
@@ -109,7 +108,7 @@ internal class PMAdapter(context: Context, var uid: Int) : ArrayAdapter<JuickMes
         return 0
     }
 
-    override fun getView(position: Int, convertView: View, parent: ViewGroup): View {
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val msg = getItem(position)
 
         var v: View? = convertView
