@@ -45,6 +45,28 @@ android {
       lintOptions {
           abortOnError false
       }
+    // signing config
+    if (file("keystore.properties").exists()) {
+        Properties props = new Properties()
+        props.load(new FileInputStream(file("keystore.properties")))
+
+        signingConfigs {
+            juick {
+                storeFile file(props["key.store"])
+                storePassword props["key.store.password"]
+                keyAlias props["key.alias"]
+                keyPassword props["key.alias.password"]
+            }
+        }
+
+        buildTypes {
+            release {
+                minifyEnabled false
+                signingConfig signingConfigs.juick
+            }
+        }
+    }
+
 }
 
 repositories {
