@@ -87,7 +87,7 @@ dependencies {
     compile 'com.android.support:design:23.1.+'
     compile 'com.neovisionaries:nv-websocket-client:1.12'
     compile 'com.google.android.gms:play-services-gcm:8.3.0'
-    // compile 'com.android.support:multidex:1.0.1'
+    compile 'com.jakewharton:disklrucache:2.0.2'
 
 }
 
