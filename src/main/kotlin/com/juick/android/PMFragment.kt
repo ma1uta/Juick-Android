@@ -53,7 +53,7 @@ class PMFragment : ListFragment() {
 
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle) {
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         uname = arguments.getString("uname")
